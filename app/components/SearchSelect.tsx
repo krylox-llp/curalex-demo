@@ -89,7 +89,12 @@ export default function SearchSelect({
       }
     } else if (e.key === "Escape") {
       setOpen(false);
-    } else if (e.key === "Backspace" && multiple && query === "" && value.length) {
+    } else if (
+      e.key === "Backspace" &&
+      multiple &&
+      query === "" &&
+      value.length
+    ) {
       remove(value[value.length - 1]);
     }
   }
@@ -131,7 +136,10 @@ export default function SearchSelect({
           }}
           onKeyDown={onKeyDown}
         />
-        <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`} aria-hidden>
+        <span
+          className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}
+          aria-hidden
+        >
           ▾
         </span>
       </div>

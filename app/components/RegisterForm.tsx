@@ -12,8 +12,11 @@ const INITIAL: Stats = { total: 100, inProcess: 30, completed: 50, failed: 20 };
 
 const pct = (n: number, total: number) => (total ? Math.round((n / total) * 100) : 0);
 
-export default function RegisterForm() {
+export default function RegisterForm({ email: initialEmail }: { email: string }) {
   const router = useRouter();
+  // Logged-in email (from Google login or the normal email login), stored in state
+  const [email] = useState(initialEmail);
+  console.log("Email:", email);
   const [stats] = useState<Stats>(INITIAL);
   const [country, setCountry] = useState("");
   const [error, setError] = useState("");
@@ -43,6 +46,9 @@ export default function RegisterForm() {
     <div className={styles.page}>
       <aside className={styles.sidebar}>
         <h1 className={styles.brand}>Dashboard</h1>
+        <p className={styles.userEmail} title={email}>
+          {email}
+        </p>
         <div className={styles.importWrap}>
           <button
             type="button"
