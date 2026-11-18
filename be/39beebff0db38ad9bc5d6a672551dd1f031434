@@ -1,0 +1,129 @@
+app/components/LoginForm.module.scss
+  s_bdb42c55ef35e8::t_270d5ffd99fbda 1-85
+app/components/SearchSelect.module.scss
+  s_16c04a1edc893c::t_0286d4b642e340 1-125
+app/components/LoginForm.tsx
+  s_4d163dd9274206::t_8f95bce11f2407 1-5,7-10,12-19,22,24,26-35,37-41,43-47,50,52-57
+  s_bdb42c55ef35e8::t_270d5ffd99fbda 6,20-21,23,25,36,42,48-49,51
+  s_75bc3a84b85ea0::t_af3fb2a4413942 11
+app/components/ProductForm.tsx
+  s_16c04a1edc893c::t_3e4e89a2dd61d0 1-394
+app/components/CountrySelect.tsx
+  s_16c04a1edc893c::t_3fa1f3342cc1fc 1-6,17-34,37-120
+  h_c33f5cf6d23190 7-16,35
+  h_c33f5cf6d23190 36
+app/components/AuthLayout.tsx
+  s_4d163dd9274206::t_0d87d910ec726d 1-2,4-10,12-18,20-22,24,26-28
+  s_bdb42c55ef35e8::t_270d5ffd99fbda 3,11,19,23,25
+app/components/ProductForm.module.scss
+  s_16c04a1edc893c::t_403655ef6d17ef 1-249
+app/register/page.tsx
+  s_0d0b71ae0423c4::t_4c761a78a8e6e7 3-4
+  s_4d163dd9274206::t_bca087da97595c 1-2,5
+app/components/RegisterForm.module.scss
+  s_16c04a1edc893c::t_c2447a22e076c8 49
+  s_16c04a1edc893c::t_de08b6e2df9a67 77-98,105,108,110-114,117-118,121
+  s_16c04a1edc893c::t_f5fe87ec9385bc 237-296,305
+  s_bdb42c55ef35e8::t_c42365756b675d 1-48,50-76,99-104,106-107,109,115-116,119-120,122-236,297-304,306-307
+package.json
+  s_bdb42c55ef35e8::t_5a92a30dcaa000 22
+app/components/GoogleButton.module.scss
+  s_bdb42c55ef35e8::t_270d5ffd99fbda 1-25
+app/page.tsx
+  s_4d163dd9274206::t_0c2c4ee41acb83 1-2,6-8
+app/components/AuthLayout.module.scss
+  s_bdb42c55ef35e8::t_270d5ffd99fbda 1-48
+app/layout.tsx
+  s_4d163dd9274206::t_a02c1322be91d6 16-17
+  s_bdb42c55ef35e8::t_649fc8a25dc132 3,24,26
+app/components/CountrySelect.module.scss
+  s_16c04a1edc893c::t_20eb3e42a83ca6 1-84
+app/import-register/page.tsx
+  s_16c04a1edc893c::t_012c1171439db5 1,5-13
+  s_16c04a1edc893c::t_bf225e755e194c 2-4,14-21
+app/components/GoogleButton.tsx
+  s_4d163dd9274206::t_39018a26875577 1-2,5-9,11-21
+  s_bdb42c55ef35e8::t_270d5ffd99fbda 3-4,10
+app/components/RegisterForm.tsx
+  s_16c04a1edc893c::t_f5fe87ec9385bc 3-4,16,27,86-116
+  s_0d0b71ae0423c4::t_9f9bb7a033d24e 8,13,15,36,40,42,142
+  s_bdb42c55ef35e8::t_c42365756b675d 6,43-45,65,71-73,76,78,80-82,128-130,135
+  s_0d0b71ae0423c4::t_165c42ea8e9f45 136
+  s_0d0b71ae0423c4::t_0d6ebe0e3073a9 10-11
+  s_16c04a1edc893c::t_de08b6e2df9a67 5,17-26,28-33,46-61,66-70,79,124,141
+  s_aa02bfdc2954c9::t_de148a93f5bb92 37-39
+  s_0d0b71ae0423c4::t_be5c511f3402fa 84,117,119-122,125-127,131-134,137-140
+  s_4d163dd9274206::t_d578abf9134532 1,143-144
+  h_c33f5cf6d23190 2,7,9,12,14,34-35,41,63,75,123
+  s_0d0b71ae0423c4::t_451dd422563cdd 62,64,74,77,83,85,118
+app/globals.scss
+  s_bdb42c55ef35e8::t_649fc8a25dc132 1-51
+app/styles/_variables.scss
+  s_bdb42c55ef35e8::t_649fc8a25dc132 1-18,20-40
+  s_16c04a1edc893c::t_3445aa59e836f6 19
+app/components/SearchSelect.tsx
+  s_16c04a1edc893c::t_1bfcf0d2401754 1-166
+package-lock.json
+  s_bdb42c55ef35e8::t_4404f523ee482b 21,1268-1271,1273,1275,1277-1281,1283-1287,1290-1307,1318-1322,1325-1328,1339-1343,1346-1349,1360-1364,1367-1370,1381-1385,1388-1391,1402-1406,1409-1412,1414,1423-1427,1430-1433,1444-1448,1451-1454,1456,1465-1469,1472-1475,1486-1490,1493-1496,1498,1503-1505,1507-1511,1514-1517,1528-1532,1535-1538,1549-1553,1556-1559,1562-1581,1583,2693-2708,2898,4026-4032,4880-4887,5287-5300,5479-5499
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be39beebff0db38ad9bc5d6a672551dd1f031434",
+  "prompts": {},
+  "humans": {
+    "h_c33f5cf6d23190": {
+      "author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    }
+  },
+  "sessions": {
+    "s_0d0b71ae0423c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "658335be-520a-4d37-8a8a-f124e00aa897",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_16c04a1edc893c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a8493dcb-196e-4a83-997c-2d948a121b68",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_4d163dd9274206": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6ca2485d-d535-464f-a583-a1ebf1e066e1",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_75bc3a84b85ea0": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1794893543509",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_aa02bfdc2954c9": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1794901387738",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_bdb42c55ef35e8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bf99b782-a54d-43aa-b7f5-982b0da55e58",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    }
+  }
+}
