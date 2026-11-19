@@ -1,0 +1,156 @@
+app/components/ProductForm.tsx
+  s_d5b512c22b3ece::t_d2149f3e4b5cf0 3,5,20,166-193,201-202,205-208,216,222,234-238,241,252-253,255-262,286,300,312,489-579,698
+  h_c33f5cf6d23190 19,22,85-86,115-124,254,356,374,384-386,404
+  s_d5b512c22b3ece::t_cc847d0042829c 23-84,89,91,94,104-105,107,112-113
+  s_d5b512c22b3ece::t_a0d82e9b78287e 88,90,92-93
+  s_d5b512c22b3ece::t_9b86c5a75e948c 87,98,103,106,108-111,217-221,263-280,379,390-398
+  s_d5b512c22b3ece::t_0fc12d6e397eef 95-97,99-102
+  s_d5b512c22b3ece::t_6a3d9fb4d9e2e3 298-299
+  s_d5b512c22b3ece::t_f13e4cd5a0610f 309-311
+  s_d5b512c22b3ece::t_63c93033b54479 399-400
+  s_d5b512c22b3ece::t_cabc8f136014e8 695-697
+  h_c33f5cf6d23190 12-18,307-308,314-318,340-344,355,357-359,380-383,387-389,405-408,419-423,434-438,460-464,477-481,675-680,694
+app/components/ProductForm.module.scss
+  s_d5b512c22b3ece::t_ba429bc69ec065 337-371
+  s_d5b512c22b3ece::t_d2149f3e4b5cf0 250-336
+app/api/smart-api/route.ts
+  s_d5b512c22b3ece::t_a0d82e9b78287e 1-47
+app/components/ProductSummary.tsx
+  s_d5b512c22b3ece::t_ba429bc69ec065 1-96
+app/components/RegisterForm.tsx
+  s_f5ba1166416470::t_ec301362a25ca9 10
+  s_4733821c6d2fff::t_267011ebbbbb80 277
+  h_c33f5cf6d23190 7,11,17,35,37,69,75,81,112,204,233,278-280
+  s_714ab3d2351b86::t_d38b7fffaff066 181
+  s_5a194b6386e015::t_9ad27d2321b841 228-232,234
+  s_f7af0a272814b3::t_1e7fcfecc553c1 8
+  s_6c1e5c127ee369::t_3485d76e631407 150
+  s_6d53276beb3ed6::t_4c64109a14c610 281
+  s_fc7ddc19b8e6ed::t_9a59ce9e23463b 3,18,24-32,44-47,65-68,70-74,76-80,82,88-103,109,111,119-122,127-128,130-145,148-149,151-154,156-160,162-168,170-176,178-180,182-203,205-226,235-242,244-256,258-275,291,308-311,315-439
+  s_2823aa81b669cf::t_d98828616fe79d 9
+  s_fc7ddc19b8e6ed::t_451a0e49a145ec 21-23
+  s_6d53276beb3ed6::t_0fcb204748df70 282
+  h_c33f5cf6d23190 13-16,34,36,38,227,276
+app/components/AuthLayout.module.scss
+  s_d5b512c22b3ece::t_6c0b65653d99f9 41
+app/import-register/summary/page.tsx
+  s_d5b512c22b3ece::t_ba429bc69ec065 1-20
+app/components/RegisterForm.module.scss
+  s_d5b512c22b3ece::t_f7f64271ade75c 931,933
+  s_d5b512c22b3ece::t_d2b0fde8fef153 923
+  s_d5b512c22b3ece::t_e861d9a5c127ad 795-861,869,871-887,890-900,902,910-922,924-930,932,934-974
+  s_d5b512c22b3ece::t_11719525e292d8 901,903-904
+  s_fc7ddc19b8e6ed::t_af2db07fadf659 4,6-9,11-15,17-21,23,26-31,37,46-47,51-59,65-81,85-94,101-118,122-123,127,130-133,136-137,140-141,145-148,151,153,157,166-183,186,189-190,193,197-211,213-214,216,218-249,252-256,259,261-292,295,297-298,301-323,328-329,333,337-339,343-366,368,371-372,376-378,381-386,389-391,394,398,400,404,408-434,438,440-441,444-445,463-465,472,475-500,503-520,528,530,534-537,540-553,558-559,574,576,582,586,592-593,597-609,611-762,766-794
+  s_d5b512c22b3ece::t_a55f0a2417c487 862-865,867-868
+  s_d5b512c22b3ece::t_fecd0bb725152d 888-889
+  h_c33f5cf6d23190 10,16,22,610
+  s_d5b512c22b3ece::t_397b3d6b3ec434 866,870
+  s_d5b512c22b3ece::t_f32638c84e1f12 905-909
+app/components/LoginForm.module.scss
+  s_d5b512c22b3ece::t_6c0b65653d99f9 4,14
+  h_c33f5cf6d23190 12-13,15
+  h_c33f5cf6d23190 44-46
+app/assets/clipboard.svg
+  h_c33f5cf6d23190 1-12
+app/assets/rocket.svg
+  h_c33f5cf6d23190 1-12
+app/assets/star.svg
+  h_c33f5cf6d23190 1-6
+app/assets/trophy.svg
+  h_c33f5cf6d23190 1-9
+app/components/LoginForm.tsx
+  h_c33f5cf6d23190 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "58a877c4943c5d2d4c7ca582721941a52595521d",
+  "prompts": {},
+  "humans": {
+    "h_c33f5cf6d23190": {
+      "author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    }
+  },
+  "sessions": {
+    "s_2823aa81b669cf": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019383797",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_4733821c6d2fff": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019008365",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_5a194b6386e015": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019180155",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_6c1e5c127ee369": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019409143",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_6d53276beb3ed6": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795018912486",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_714ab3d2351b86": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019418007",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_d5b512c22b3ece": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7280870f-784c-456d-a02b-8e9ad0041f31",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_f5ba1166416470": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019391990",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_f7af0a272814b3": {
+      "agent_id": {
+        "tool": "github-copilot-tab",
+        "id": "ai_tab-1795019203334",
+        "model": "default"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    },
+    "s_fc7ddc19b8e6ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "16b5a7ca-bc0c-4895-8878-a81a6d44f294",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "shanmugapiriya-2002 <shanmugapiriya@krylox.ai>"
+    }
+  }
+}
