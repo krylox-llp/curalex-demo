@@ -1,6 +1,7 @@
 @use "../styles/variables" as *;
 
 .title {
+  text-align: center;
   font-size: 1.5rem;
   line-height: 2rem;
   font-weight: 600;
@@ -8,8 +9,10 @@
 }
 
 .subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 1.25rem;
   color: $slate-500;
 }
 
@@ -38,7 +41,9 @@
   font-size: 0.875rem;
   color: $slate-800;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 
   &::placeholder {
     color: $slate-400;

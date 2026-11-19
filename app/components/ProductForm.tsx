@@ -1,26 +1,127 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import SearchSelect from "./SearchSelect";
 import styles from "./ProductForm.module.scss";
 
 // Demo master data — replace with API data later
 const PRODUCT_CLASSES = ["Human", "Veterinary"];
 const CATEGORIES = ["NCE", "Generic", "Combination"];
-const DOSAGE_FORMS = ["Tablet", "Capsule", "Syrup", "Injection", "Cream", "Ointment", "Suspension"];
+const DOSAGE_FORMS = [
+  "Tablet",
+  "Capsule",
+  "Syrup",
+  "Injection",
+  "Cream",
+  "Ointment",
+  "Suspension",
+];
 const ROUTES = ["Oral", "IV", "IM", "SC", "Topical", "Inhalation"];
+const MOLECULES_API = [
+  "Abacavir (sulfate)",
+  "Albendazole",
+  "Amodiaquine (hydrochloride)",
+  "Artemether",
+  "Artesunate",
+  "Artesunate (sterile)",
+  "Atazanavir (sulfate)",
+  "Bedaquiline (fumarate)",
+  "Bedaquiline fumarate",
+  "Cabotegravir (sodium)",
+  "Carbetocin",
+  "Clofazimine",
+  "Cycloserine",
+  "Daclatasvir (dihydrochloride)",
+  "Darunavir",
+  "Darunavir (ethanolate)",
+  "Delamanid",
+  "Desogestrel",
+  "Dihydroartemisinin",
+  "Dolutegravir (sodium)",
+  "Efavirenz",
+  "Emtricitabine",
+  "Ethambutol hydrochloride",
+  "Ethinylestradiol",
+  "Ethionamide",
+  "Flucytosine",
+  "Isoniazid",
+  "Lamivudine",
+  "Levofloxacin",
+  "Levonorgestrel",
+  "Linezolid",
+  "Lopinavir",
+  "Lumefantrine",
+  "Mebendazole",
+  "Medroxyprogesterone acetate",
+  "Medroxyprogesterone acetate - Sterile",
+  "Mifepristone",
+  "Miltefosine",
+  "Misoprostol Dispersion (1:100 in HPMC)",
+  "Molnupiravir",
+  "Nevirapine",
+  "Nirmatrelvir",
+  "Oseltamivir (phosphate)",
+  "Oxytocin",
+  "Para-aminosalicylate (sodium)",
+  "Piperaquine phosphate",
+  "Praziquantel",
+  "Protionamide",
+  "Pyrazinamide",
+  "Pyrimethamine",
+  "Pyronaridine (phosphate)",
+  "Rifampicin",
+  "Rifapentine",
+  "Ritonavir",
+  "Sofosbuvir",
+  "Sulfadoxine",
+  "Tenofovir alafenamide",
+  "Tenofovir disoproxil fumarate",
+  "Tranexamic acid",
+  "Velpatasvir",
+  "Zidovudine",
+  "Zinc (sulfate)",
+];
+
+async function fetchSmartApi(inn: string): Promise<string[]> {
+  console.log("smart-api request:", { inn });
+  try {
+    const res = await fetch("/api/smart-api", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inn }),
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok) {
+      console.error(`smart-api error (${inn}):`, res.status, json);
+      return [];
+    }
+    const rows: { id: number; name: string }[] = json?.data ?? [];
+    console.log(`smart-api response for "${inn}":`, json);
+    console.table(rows.map(({ id, name }) => ({ id, name })));
+    return rows.map((r) => r.name).filter(Boolean);
+  } catch (err) {
+    console.error("smart-api error:", err);
+    return [];
+  }
+}
+
+function manufacturersFor(apis: string[], byApi: Record<string, string[]>) {
+  return [...new Set(apis.flatMap((a) => byApi[a] ?? []))];
+}
+
 const MOLECULES = [
-  "Amoxicillin",
-  "Azithromycin",
-  "Caffeine",
-  "Cetirizine",
-  "Diclofenac",
-  "Ibuprofen",
-  "Metformin",
-  "Omeprazole",
-  "Paracetamol",
-  "Pantoprazole",
+  "Ethylalcohol (ethanol)",
+  "Glycerol",
+  "Hydrogenated starch hydrolysate",
+  "Isopropyl alcohol (IPA) (See ethylalcohol)",
+  "Maltitol",
+  "Propylene glycol",
+  "Sorbitol",
+  "Polyethylene Glycol",
+  "Diethylene Glycol Stearates",
+  "Polyethylene Glycol Monomethyl Ether",
 ];
 const COMPANIES = [
   "Cipla Ltd",
@@ -62,6 +163,34 @@ const EMPTY: FormState = {
   trademarkOwner: [],
 };
 
+const WARNING_RULES: {
+  field: "genericName" | "apis";
+  value: string;
+  message: string;
+}[] = [
+  {
+    field: "genericName",
+    value: "Glycerol",
+    message:
+      "Sampling and testing of raw materials and excipients can be used to detect the presence of DEG.",
+  },
+  {
+    field: "apis",
+    value: "Albendazole",
+    message: "API Albendazole is in NAFDAC ceiling list.",
+  },
+];
+
+function getWarnings(f: FormState): string[] {
+  return WARNING_RULES.filter((r) =>
+    f[r.field].some((v) => v.trim().toLowerCase() === r.value.toLowerCase()),
+  ).map((r) => r.message);
+}
+
+export const PRODUCT_STORAGE_KEY = "importRegisterProduct";
+
+type Popup = { type: "warning"; messages: string[] } | { type: "success" };
+
 function validate(f: FormState): Errors {
   const e: Errors = {};
   if (!f.productClass) e.productClass = "Select a product class";
@@ -69,11 +198,14 @@ function validate(f: FormState): Errors {
   if (!f.brandName.trim()) e.brandName = "Enter the brand name";
   if (!f.genericName.length) e.genericName = "Select or enter the generic name";
   if (!f.apis.length) e.apis = "Select at least one API";
-  if (!f.strengths.some((s) => s.trim())) e.strengths = "Enter at least one strength";
+  if (!f.strengths.some((s) => s.trim()))
+    e.strengths = "Enter at least one strength";
   if (!f.dosageForm) e.dosageForm = "Select a dosage form";
   if (!f.route) e.route = "Select a route";
-  if (!f.packSizes.some((s) => s.trim())) e.packSizes = "Enter at least one pack size";
-  if (!f.manufacturer.length) e.manufacturer = "Select the manufacturer / factory";
+  if (!f.packSizes.some((s) => s.trim()))
+    e.packSizes = "Enter at least one pack size";
+  if (!f.manufacturer.length)
+    e.manufacturer = "Select the manufacturer / factory";
   if (!f.trademarkOwner.length) e.trademarkOwner = "Select the trademark owner";
   return e;
 }
@@ -81,24 +213,32 @@ function validate(f: FormState): Errors {
 export default function ProductForm({ country }: { country: string }) {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
-  const [submitted, setSubmitted] = useState(false);
-  // Remount the search dropdowns on reset so their typed text clears
+  const [popup, setPopup] = useState<Popup | null>(null);
+  const [manufacturersByApi, setManufacturersByApi] = useState<
+    Record<string, string[]>
+  >({});
+  const [loadingApis, setLoadingApis] = useState<string[]>([]);
+  const manufacturerOptions = manufacturersFor(form.apis, manufacturersByApi);
+  const router = useRouter();
   const [formKey, setFormKey] = useState(0);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
-    setSubmitted(false);
   }
 
   function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     const errs = validate(form);
     setErrors(errs);
-    if (Object.keys(errs).length) {
-      setSubmitted(false);
+    if (Object.keys(errs).length) return;
+
+    const warnings = getWarnings(form);
+    if (warnings.length) {
+      setPopup({ type: "warning", messages: warnings });
       return;
     }
+
     const payload = {
       country,
       ...form,
@@ -108,15 +248,42 @@ export default function ProductForm({ country }: { country: string }) {
       strengths: form.strengths.map((s) => s.trim()).filter(Boolean),
       packSizes: form.packSizes.map((s) => s.trim()).filter(Boolean),
     };
-    // TODO: send `payload` to the backend
     console.log("Register product:", payload);
-    setSubmitted(true);
+    try {
+      sessionStorage.setItem(PRODUCT_STORAGE_KEY, JSON.stringify(payload));
+    } catch {}
+    setPopup({ type: "success" });
+  }
+
+  function handleNext() {
+    setPopup(null);
+    router.push(
+      `/import-register/summary?country=${encodeURIComponent(country)}`,
+    );
+  }
+
+  function handleApisChange(apis: string[]) {
+    set("apis", apis);
+
+    const remaining = manufacturersFor(apis, manufacturersByApi);
+    if (form.manufacturer.length && !remaining.includes(form.manufacturer[0])) {
+      set("manufacturer", []);
+    }
+
+    apis
+      .filter((inn) => !form.apis.includes(inn) && !manufacturersByApi[inn])
+      .forEach(async (inn) => {
+        setLoadingApis((l) => [...l, inn]);
+        const names = await fetchSmartApi(inn);
+        setManufacturersByApi((m) => ({ ...m, [inn]: names }));
+        setLoadingApis((l) => l.filter((x) => x !== inn));
+      });
   }
 
   function handleReset() {
     setForm(EMPTY);
     setErrors({});
-    setSubmitted(false);
+    setPopup(null);
     setFormKey((k) => k + 1);
   }
 
@@ -128,16 +295,27 @@ export default function ProductForm({ country }: { country: string }) {
             ← Back to dashboard
           </Link>
           <h1 className={styles.title}>Import Register</h1>
-          <p className={styles.subtitle}>Enter the product registration details.</p>
+          <p className={styles.subtitle}>
+            Enter the product registration details.
+          </p>
         </div>
         <span className={styles.countryBadge}>
           Country: <strong>{country || "Not selected"}</strong>
         </span>
       </header>
 
-      <form key={formKey} className={styles.card} onSubmit={handleSubmit} noValidate>
+      <form
+        key={formKey}
+        className={styles.card}
+        onSubmit={handleSubmit}
+        noValidate
+      >
         <div className={styles.grid}>
-          <Field label="Product Class" htmlFor="productClass" error={errors.productClass}>
+          <Field
+            label="Product Class"
+            htmlFor="productClass"
+            error={errors.productClass}
+          >
             <Select
               id="productClass"
               value={form.productClass}
@@ -159,7 +337,11 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field label="Brand Name" htmlFor="brandName" error={errors.brandName}>
+          <Field
+            label="Brand Name"
+            htmlFor="brandName"
+            error={errors.brandName}
+          >
             <input
               id="brandName"
               type="text"
@@ -170,7 +352,11 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field label="Generic Name (INN)" htmlFor="genericName" error={errors.genericName}>
+          <Field
+            label="Excipients (INN)"
+            htmlFor="genericName"
+            error={errors.genericName}
+          >
             <SearchSelect
               id="genericName"
               options={MOLECULES}
@@ -185,16 +371,41 @@ export default function ProductForm({ country }: { country: string }) {
           <Field label="API(s)" htmlFor="apis" error={errors.apis} wide>
             <SearchSelect
               id="apis"
-              options={MOLECULES}
+              options={MOLECULES_API}
               value={form.apis}
               multiple
               placeholder="Search and select APIs"
               invalid={!!errors.apis}
-              onChange={(v) => set("apis", v)}
+              onChange={handleApisChange}
             />
           </Field>
 
-          <Field label="Strength(s)" htmlFor="strengths-0" error={errors.strengths}>
+          <Field
+            label="Manufacturer Name / Factory"
+            htmlFor="manufacturer"
+            error={errors.manufacturer}
+          >
+            <SearchSelect
+              id="manufacturer"
+              options={manufacturerOptions}
+              value={form.manufacturer}
+              placeholder={
+                !form.apis.length
+                  ? "Select API(s) first"
+                  : loadingApis.some((a) => form.apis.includes(a))
+                    ? "Loading manufacturers…"
+                    : "Search company / factory"
+              }
+              invalid={!!errors.manufacturer}
+              onChange={(v) => set("manufacturer", v)}
+            />
+          </Field>
+
+          <Field
+            label="Strength(s)"
+            htmlFor="strengths-0"
+            error={errors.strengths}
+          >
             <Repeatable
               idPrefix="strengths"
               values={form.strengths}
@@ -205,7 +416,11 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field label="Pack Sizes" htmlFor="packSizes-0" error={errors.packSizes}>
+          <Field
+            label="Pack Sizes"
+            htmlFor="packSizes-0"
+            error={errors.packSizes}
+          >
             <Repeatable
               idPrefix="packSizes"
               values={form.packSizes}
@@ -216,7 +431,11 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field label="Dosage Form" htmlFor="dosageForm" error={errors.dosageForm}>
+          <Field
+            label="Dosage Form"
+            htmlFor="dosageForm"
+            error={errors.dosageForm}
+          >
             <Select
               id="dosageForm"
               value={form.dosageForm}
@@ -238,18 +457,11 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field label="Manufacturer Name / Factory" htmlFor="manufacturer" error={errors.manufacturer}>
-            <SearchSelect
-              id="manufacturer"
-              options={COMPANIES}
-              value={form.manufacturer}
-              placeholder="Search company / factory"
-              invalid={!!errors.manufacturer}
-              onChange={(v) => set("manufacturer", v)}
-            />
-          </Field>
-
-          <Field label="Trademark Owner" htmlFor="trademarkOwner" error={errors.trademarkOwner}>
+          <Field
+            label="Trademark Owner"
+            htmlFor="trademarkOwner"
+            error={errors.trademarkOwner}
+          >
             <SearchSelect
               id="trademarkOwner"
               options={COMPANIES}
@@ -261,14 +473,12 @@ export default function ProductForm({ country }: { country: string }) {
           </Field>
         </div>
 
-        {submitted && (
-          <p role="status" className={styles.success}>
-            Product details saved for {country}.
-          </p>
-        )}
-
         <div className={styles.actions}>
-          <button type="button" className={styles.secondary} onClick={handleReset}>
+          <button
+            type="button"
+            className={styles.secondary}
+            onClick={handleReset}
+          >
             Reset
           </button>
           <button type="submit" className={styles.primary}>
@@ -276,6 +486,97 @@ export default function ProductForm({ country }: { country: string }) {
           </button>
         </div>
       </form>
+
+      {popup && (
+        <ResultPopup
+          popup={popup}
+          country={country}
+          onClose={() => setPopup(null)}
+          onNext={handleNext}
+        />
+      )}
+    </div>
+  );
+}
+
+function ResultPopup({
+  popup,
+  country,
+  onClose,
+  onNext,
+}: {
+  popup: Popup;
+  country: string;
+  onClose: () => void;
+  onNext: () => void;
+}) {
+  const isWarning = popup.type === "warning";
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div
+        role={isWarning ? "alertdialog" : "dialog"}
+        aria-modal="true"
+        aria-labelledby="popup-title"
+        className={`${styles.popup} ${isWarning ? styles.popupWarning : styles.popupSuccess}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className={styles.popupIcon} aria-hidden>
+          {isWarning ? "!" : "✓"}
+        </span>
+        <h2 id="popup-title" className={styles.popupTitle}>
+          {isWarning ? "Warning" : "Success"}
+        </h2>
+
+        {isWarning ? (
+          <ul className={styles.popupList}>
+            {popup.messages.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.popupText}>
+            Product details saved successfully for {country}.
+          </p>
+        )}
+
+        <div className={styles.popupActions}>
+          {isWarning ? (
+            <button
+              type="button"
+              className={styles.primary}
+              onClick={onClose}
+              autoFocus
+            >
+              OK
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={styles.secondary}
+                onClick={onClose}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                className={styles.primary}
+                onClick={onNext}
+                autoFocus
+              >
+                Next →
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -371,8 +672,12 @@ function Repeatable({
             className={`${styles.input} ${invalid ? styles.invalid : ""}`}
             placeholder={placeholder}
             value={v}
-            aria-label={i > 0 ? `${addLabel.replace("Add ", "")} ${i + 1}` : undefined}
-            onChange={(e) => onChange(values.map((x, j) => (j === i ? e.target.value : x)))}
+            aria-label={
+              i > 0 ? `${addLabel.replace("Add ", "")} ${i + 1}` : undefined
+            }
+            onChange={(e) =>
+              onChange(values.map((x, j) => (j === i ? e.target.value : x)))
+            }
           />
           {values.length > 1 && (
             <button
@@ -386,7 +691,11 @@ function Repeatable({
           )}
         </div>
       ))}
-      <button type="button" className={styles.addBtn} onClick={() => onChange([...values, ""])}>
+      <button
+        type="button"
+        className={styles.addBtn}
+        onClick={() => onChange([...values, ""])}
+      >
         + {addLabel}
       </button>
     </div>
