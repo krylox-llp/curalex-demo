@@ -3,18 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./CountrySelect.module.scss";
 
-export const COUNTRIES = [
-  "BRAZIL",
-  "CANADA",
-  "FRANCE",
-  "GERMANY",
-  "NETHERLAND",
-  "NIGERIA",
-  "RUSSIA",
-  "SOUTH AFRICA",
-  "UK",
-  "USA",
-];
+export const COUNTRIES = ["NIGERIA"];
 
 type Props = {
   value: string;
@@ -28,11 +17,21 @@ export default function CountrySelect({ value, onChange }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(
-    () => COUNTRIES.filter((c) => c.toLowerCase().includes(query.trim().toLowerCase())),
+    () =>
+      COUNTRIES.filter((c) =>
+        c.toLowerCase().includes(query.trim().toLowerCase()),
+      ),
     [query],
   );
 
-  console.log("CountrySelect - value:", value, "query:", query, "filtered:", filtered);
+  console.log(
+    "CountrySelect - value:",
+    value,
+    "query:",
+    query,
+    "filtered:",
+    filtered,
+  );
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -86,7 +85,10 @@ export default function CountrySelect({ value, onChange }: Props) {
         }}
         onKeyDown={onKeyDown}
       />
-      <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`} aria-hidden>
+      <span
+        className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}
+        aria-hidden
+      >
         ▾
       </span>
 

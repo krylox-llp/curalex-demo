@@ -17,8 +17,10 @@ export default function LoginForm() {
 
   return (
     <>
-      <h1 className={styles.title}>Welcome</h1>
-      <p className={styles.subtitle}>Log in or sign up to continue</p>
+      <h1 className={styles.title}>Welcome !</h1>
+      <p className={styles.subtitle}>
+        Sign in securely with your Google account
+      </p>
 
       <GoogleButton />
     </>

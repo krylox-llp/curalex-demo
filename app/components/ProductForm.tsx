@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SearchSelect from "./SearchSelect";
+import LoadingScreen from "./LoadingScreen";
 import styles from "./ProductForm.module.scss";
 
 // Demo master data — replace with API data later
@@ -144,8 +145,12 @@ type FormState = {
   route: string;
   packSizes: string[];
   manufacturer: string[];
+  /** API + manufacturer pairs added with the "Add" button */
+  apiManufacturers: ApiManufacturer[];
   trademarkOwner: string[];
 };
+
+type ApiManufacturer = { api: string; manufacturer: string };
 
 type Errors = Partial<Record<keyof FormState, string>>;
 
@@ -160,6 +165,7 @@ const EMPTY: FormState = {
   route: "",
   packSizes: [""],
   manufacturer: [],
+  apiManufacturers: [],
   trademarkOwner: [],
 };
 
@@ -182,10 +188,17 @@ const WARNING_RULES: {
 ];
 
 function getWarnings(f: FormState): string[] {
-  return WARNING_RULES.filter((r) =>
-    f[r.field].some((v) => v.trim().toLowerCase() === r.value.toLowerCase()),
-  ).map((r) => r.message);
+  return WARNING_RULES.filter((r) => {
+    const values =
+      r.field === "apis" ? f.apiManufacturers.map((p) => p.api) : f[r.field];
+    return values.some(
+      (v) => v.trim().toLowerCase() === r.value.toLowerCase(),
+    );
+  }).map((r) => r.message);
 }
+
+/** How long the submit loader shows before the popup appears */
+const LOADER_MS = 1500;
 
 export const PRODUCT_STORAGE_KEY = "importRegisterProduct";
 
@@ -197,16 +210,17 @@ function validate(f: FormState): Errors {
   if (!f.category) e.category = "Select a category";
   if (!f.brandName.trim()) e.brandName = "Enter the brand name";
   if (!f.genericName.length) e.genericName = "Select or enter the generic name";
-  if (!f.apis.length) e.apis = "Select at least one API";
   if (!f.strengths.some((s) => s.trim()))
     e.strengths = "Enter at least one strength";
   if (!f.dosageForm) e.dosageForm = "Select a dosage form";
   if (!f.route) e.route = "Select a route";
   if (!f.packSizes.some((s) => s.trim()))
     e.packSizes = "Enter at least one pack size";
-  if (!f.manufacturer.length)
-    e.manufacturer = "Select the manufacturer / factory";
-  if (!f.trademarkOwner.length) e.trademarkOwner = "Select the trademark owner";
+  if (!f.apiManufacturers.length)
+    e.apiManufacturers =
+      f.apis.length && f.manufacturer.length
+        ? "Click “Add” to add the selected API and manufacturer"
+        : "Select an API and manufacturer, then click “Add”";
   return e;
 }
 
@@ -214,6 +228,7 @@ export default function ProductForm({ country }: { country: string }) {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [popup, setPopup] = useState<Popup | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [manufacturersByApi, setManufacturersByApi] = useState<
     Record<string, string[]>
   >({});
@@ -221,17 +236,25 @@ export default function ProductForm({ country }: { country: string }) {
   const manufacturerOptions = manufacturersFor(form.apis, manufacturersByApi);
   const router = useRouter();
   const [formKey, setFormKey] = useState(0);
+  // Bumped after "Add" so the two pickers reset their typed text
+  const [pickKey, setPickKey] = useState(0);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
   }
 
-  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting) return;
     const errs = validate(form);
     setErrors(errs);
     if (Object.keys(errs).length) return;
+
+    // Show the loader first; the warning / success popup appears after it
+    setSubmitting(true);
+    await new Promise((r) => setTimeout(r, LOADER_MS));
+    setSubmitting(false);
 
     const warnings = getWarnings(form);
     if (warnings.length) {
@@ -243,10 +266,14 @@ export default function ProductForm({ country }: { country: string }) {
       country,
       ...form,
       genericName: form.genericName[0],
-      manufacturer: form.manufacturer[0],
+      apis: [...new Set(form.apiManufacturers.map((p) => p.api))],
+      manufacturer: [
+        ...new Set(form.apiManufacturers.map((p) => p.manufacturer)),
+      ],
       trademarkOwner: form.trademarkOwner[0],
       strengths: form.strengths.map((s) => s.trim()).filter(Boolean),
       packSizes: form.packSizes.map((s) => s.trim()).filter(Boolean),
+      submittedAt: new Date().toISOString(),
     };
     console.log("Register product:", payload);
     try {
@@ -278,6 +305,28 @@ export default function ProductForm({ country }: { country: string }) {
         setManufacturersByApi((m) => ({ ...m, [inn]: names }));
         setLoadingApis((l) => l.filter((x) => x !== inn));
       });
+  }
+
+  function handleAddApiManufacturer() {
+    const api = form.apis[0];
+    const manufacturer = form.manufacturer[0];
+    if (!api || !manufacturer) return;
+    const exists = form.apiManufacturers.some(
+      (p) => p.api === api && p.manufacturer === manufacturer,
+    );
+    if (!exists) {
+      set("apiManufacturers", [...form.apiManufacturers, { api, manufacturer }]);
+    }
+    set("apis", []);
+    set("manufacturer", []);
+    setPickKey((k) => k + 1);
+  }
+
+  function removeApiManufacturer(index: number) {
+    set(
+      "apiManufacturers",
+      form.apiManufacturers.filter((_, i) => i !== index),
+    );
   }
 
   function handleReset() {
@@ -368,12 +417,12 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field label="API(s)" htmlFor="apis" error={errors.apis} wide>
+          <Field label="API(s)" htmlFor="apis" error={errors.apis}>
             <SearchSelect
+              key={`apis-${pickKey}`}
               id="apis"
               options={MOLECULES_API}
               value={form.apis}
-              multiple
               placeholder="Search and select APIs"
               invalid={!!errors.apis}
               onChange={handleApisChange}
@@ -386,6 +435,7 @@ export default function ProductForm({ country }: { country: string }) {
             error={errors.manufacturer}
           >
             <SearchSelect
+              key={`manufacturer-${pickKey}`}
               id="manufacturer"
               options={manufacturerOptions}
               value={form.manufacturer}
@@ -400,6 +450,54 @@ export default function ProductForm({ country }: { country: string }) {
               onChange={(v) => set("manufacturer", v)}
             />
           </Field>
+
+          <div className={`${styles.wide} ${styles.pairArea}`}>
+            {form.apis.length > 0 && form.manufacturer.length > 0 && (
+              <button
+                type="button"
+                className={styles.pairAddBtn}
+                onClick={handleAddApiManufacturer}
+              >
+                + Add
+              </button>
+            )}
+
+            {form.apiManufacturers.length > 0 && (
+              <table className={styles.pairTable}>
+                <thead>
+                  <tr>
+                    <th scope="col">API</th>
+                    <th scope="col">Manufacturer</th>
+                    <th scope="col">
+                      <span className={styles.srOnly}>Remove</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {form.apiManufacturers.map((p, i) => (
+                    <tr key={`${p.api}|${p.manufacturer}`}>
+                      <td>{p.api}</td>
+                      <td>{p.manufacturer}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className={styles.pairRemove}
+                          aria-label={`Remove ${p.api} – ${p.manufacturer}`}
+                          onClick={() => removeApiManufacturer(i)}
+                        >
+                          ×
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {errors.apiManufacturers && (
+              <p className={styles.error}>{errors.apiManufacturers}</p>
+            )}
+          </div>
 
           <Field
             label="Strength(s)"
@@ -457,7 +555,7 @@ export default function ProductForm({ country }: { country: string }) {
             />
           </Field>
 
-          <Field
+          {/* <Field
             label="Trademark Owner"
             htmlFor="trademarkOwner"
             error={errors.trademarkOwner}
@@ -470,7 +568,7 @@ export default function ProductForm({ country }: { country: string }) {
               invalid={!!errors.trademarkOwner}
               onChange={(v) => set("trademarkOwner", v)}
             />
-          </Field>
+          </Field> */}
         </div>
 
         <div className={styles.actions}>
@@ -481,11 +579,19 @@ export default function ProductForm({ country }: { country: string }) {
           >
             Reset
           </button>
-          <button type="submit" className={styles.primary}>
+          <button
+            type="submit"
+            className={styles.primary}
+            disabled={submitting}
+          >
             Submit
           </button>
         </div>
       </form>
+
+      {submitting && (
+        <LoadingScreen text="Please wait while we submit your product details" />
+      )}
 
       {popup && (
         <ResultPopup

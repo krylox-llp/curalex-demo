@@ -1,0 +1,130 @@
+@use "../styles/variables" as *;
+
+// ---------- Loading screen ----------
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba($white, 0.96);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  animation: loaderFade 0.2s ease-out;
+}
+
+@keyframes loaderFade {
+  from {
+    opacity: 0;
+  }
+}
+
+.loaderRing {
+  position: relative;
+  width: 9rem;
+  height: 9rem;
+}
+
+.loaderArcs {
+  width: 100%;
+  height: 100%;
+  animation: loaderSpin 1.4s linear infinite;
+
+  circle {
+    fill: none;
+    stroke-width: 7;
+    stroke-linecap: round;
+    // rotate so the first arc starts at the top
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
+}
+
+.arc0 {
+  stroke: url(#loaderGrad);
+}
+.arc1 {
+  stroke: #7cc0f5;
+}
+.arc2 {
+  stroke: #c3e1fb;
+}
+.arc3 {
+  stroke: #d6eafc;
+}
+
+@keyframes loaderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loaderIcon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: $sky-700;
+
+  svg {
+    width: 3.25rem;
+    height: 3.25rem;
+    fill: rgba($sky-400, 0.25);
+  }
+}
+
+.loaderTitle {
+  margin-top: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.loaderText {
+  margin-top: 0.5rem;
+  font-size: 1.0625rem;
+  color: $slate-500;
+}
+
+.loaderDots {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+
+  span {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: #cfe6fb;
+    animation: loaderDot 1.2s ease-in-out infinite;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+@keyframes loaderDot {
+  0%,
+  100% {
+    background: #cfe6fb;
+    transform: scale(1);
+  }
+  40% {
+    background: $sky-600;
+    transform: scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loaderArcs,
+  .loaderDots span {
+    animation: none;
+  }
+}

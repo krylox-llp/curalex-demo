@@ -1,0 +1,208 @@
+@use "../styles/variables" as *;
+
+$success: #16a34a;
+
+// ---------- Top meta / progress ----------
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0 0.25rem;
+}
+
+.progressText {
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: $slate-500;
+}
+
+.progress {
+  flex-basis: 100%;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: $slate-200;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: $primary;
+    transition: width 0.25s ease;
+  }
+}
+
+// ---------- Document row ----------
+.docRow {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+}
+
+.docDone {
+  border-color: rgba($success, 0.45);
+}
+
+.numDone {
+  background: $success !important;
+  color: $white !important;
+}
+
+.detailsBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $primary;
+
+  &:hover {
+    background: rgba($primary, 0.08);
+  }
+
+  &:focus-visible {
+    @include focus-ring(rgba($primary, 0.35));
+  }
+
+  &[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+}
+
+// ---------- Upload area ----------
+.uploadArea {
+  padding: 0 1rem 1rem;
+
+  @include md {
+    padding-left: 3.625rem; // line up with the title, past the number badge
+  }
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 3.5rem;
+  padding: 0.75rem 1rem;
+  border: 1.5px dashed $slate-300;
+  border-radius: 0.75rem;
+  background: $slate-50;
+  font-size: 0.9375rem;
+  color: $slate-500;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  strong {
+    color: $primary;
+  }
+
+  svg {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: $primary;
+  }
+
+  &:hover,
+  &.dragging {
+    border-color: $primary;
+    background: rgba($primary, 0.06);
+  }
+}
+
+.fileInput:focus-visible + .dropzone {
+  @include focus-ring(rgba($primary, 0.35));
+}
+
+.fileChip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba($success, 0.08);
+  color: $slate-700;
+
+  > svg {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: $success;
+  }
+}
+
+.fileName {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: $navy;
+  overflow-wrap: anywhere;
+}
+
+.fileSize {
+  font-size: 0.8125rem;
+  color: $slate-500;
+}
+
+.linkBtn {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $primary;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+}
+
+.removeBtn {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  color: $slate-500;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($danger, 0.1);
+    color: $danger;
+  }
+}
+
+.linkBtn,
+.removeBtn {
+  &:focus-visible {
+    @include focus-ring(rgba($primary, 0.35));
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: $danger;
+}

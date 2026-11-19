@@ -1,0 +1,65 @@
+import { Resend } from "resend";
+import { NextRequest, NextResponse } from "next/server";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { to, country, honeypot } = body;
+
+  // Bot trap
+  if (honeypot) return NextResponse.json({ ok: true });
+
+  // `to` = Trade Owner Email ID entered on the Product Summary page
+  if (!to) {
+    return NextResponse.json(
+      { error: "Missing required fields." },
+      { status: 400 },
+    );
+  }
+
+  // Link to the document upload page. Set APP_URL in production
+  // (e.g. https://pharma.example.com); falls back to the current host.
+  const baseUrl = (process.env.APP_URL || req.nextUrl.origin).replace(
+    /\/$/,
+    "",
+  );
+  const params = new URLSearchParams({ email: to });
+  if (typeof country === "string" && country) params.set("country", country);
+  const uploadUrl = `${baseUrl}/upload-documents?${params}`;
+
+  const { error } = await resend.emails.send({
+    from: "Krylox Contact Form <hello@krylox.ai>",
+    to,
+    subject: "Upload your NAFDAC registration documents",
+    text: [
+      "Hello,",
+      "",
+      "Please upload the documents required for your product registration using the link below:",
+      uploadUrl,
+      "",
+      "Thank you.",
+    ].join("\n"),
+    html: `
+      <div style="font-family:Arial,sans-serif;color:#0f1b4c;max-width:520px">
+        <p>Hello,</p>
+        <p>Please upload the documents required for your product registration with NAFDAC.</p>
+        <p style="margin:28px 0">
+          <a href="${escapeHtml(uploadUrl)}"
+             style="background:#058fc2;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:bold">
+            Upload Documents
+          </a>
+        </p>
+      </div>`,
+  });
+
+  if (error) {
+    console.error("Resend error:", error);
+    return NextResponse.json({ error: "Failed to send." }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
