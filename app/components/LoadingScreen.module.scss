@@ -24,8 +24,8 @@
 
 .loaderRing {
   position: relative;
-  width: 9rem;
-  height: 9rem;
+  width: 6.5rem;
+  height: 6.5rem;
 }
 
 .loaderArcs {
@@ -47,13 +47,13 @@
   stroke: url(#loaderGrad);
 }
 .arc1 {
-  stroke: #7cc0f5;
+  stroke: $brand-400;
 }
 .arc2 {
-  stroke: #c3e1fb;
+  stroke: $brand-200;
 }
 .arc3 {
-  stroke: #d6eafc;
+  stroke: $brand-100;
 }
 
 @keyframes loaderSpin {
@@ -70,22 +70,22 @@
   color: $sky-700;
 
   svg {
-    width: 3.25rem;
-    height: 3.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
     fill: rgba($sky-400, 0.25);
   }
 }
 
 .loaderTitle {
-  margin-top: 2rem;
-  font-size: 2rem;
+  margin-top: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   color: $navy;
 }
 
 .loaderText {
   margin-top: 0.5rem;
-  font-size: 1.0625rem;
+  font-size: 0.9375rem;
   color: $slate-500;
 }
 
@@ -98,7 +98,7 @@
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 50%;
-    background: #cfe6fb;
+    background: $brand-100;
     animation: loaderDot 1.2s ease-in-out infinite;
 
     &:nth-child(2) {
@@ -113,7 +113,7 @@
 @keyframes loaderDot {
   0%,
   100% {
-    background: #cfe6fb;
+    background: $brand-100;
     transform: scale(1);
   }
   40% {

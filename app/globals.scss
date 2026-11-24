@@ -1,13 +1,10 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@use "./styles/variables" as *;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+// The portal is a light, clinical UI by design.
+:root {
+  color-scheme: light;
+  --background: #{$page-bg};
+  --foreground: #{$slate-800};
 }
 
 *,
@@ -30,11 +27,21 @@ body {
   flex-direction: column;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Arial,
+    sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
+  line-height: 1.25;
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
   color: inherit;
 }
@@ -48,4 +55,9 @@ button {
 svg,
 img {
   display: block;
+}
+
+::selection {
+  background: $brand-100;
+  color: $brand-900;
 }

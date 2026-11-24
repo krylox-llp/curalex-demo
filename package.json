@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "google-sso-library": "^0.1.0",
+    "@supabase/ssr": "^0.12.7",
     "next": "16.4.6",
     "nodemailer": "^8.0.11",
     "react": "19.3.0",

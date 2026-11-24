@@ -1,28 +1,63 @@
 @use "../styles/variables" as *;
 
-$success: #16a34a;
-
-// ---------- Top meta / progress ----------
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1rem;
-  padding: 0 0.25rem;
+// ---------- Card ----------
+.card {
+  max-width: 64rem;
+  margin: 0 auto;
+  border: 1px solid $border;
+  border-radius: $radius;
+  background: $white;
+  box-shadow: $shadow-sm;
 }
 
-.progressText {
-  margin-left: auto;
-  font-size: 0.875rem;
+.cardHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid $border;
+
+  @include md {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+.cardHeadRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.cardSub {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
   color: $slate-500;
 }
 
+.progressText {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  color: $slate-500;
+  font-variant-numeric: tabular-nums;
+
+  strong {
+    font-size: 1rem;
+    color: $navy;
+  }
+}
+
 .progress {
-  flex-basis: 100%;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: $slate-200;
+  height: 0.375rem;
   overflow: hidden;
+  border-radius: 999px;
+  background: $slate-100;
 
   span {
     display: block;
@@ -33,40 +68,108 @@ $success: #16a34a;
   }
 }
 
-// ---------- Document row ----------
-.docRow {
+.allDone .progress span {
+  background: $success;
+}
+
+// ---------- Checklist rows ----------
+.list {
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  transition: background-color 0.15s ease;
+
+  & + & {
+    border-top: 1px solid $slate-100;
+  }
+
+  &:hover {
+    background: $slate-50;
+  }
+}
+
+.itemDragging {
+  background: $brand-50 !important;
+  box-shadow: inset 0 0 0 1.5px $primary;
+}
+
+.row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.875rem;
-  padding: 0.875rem 1rem;
+  padding: 0.875rem 1.25rem;
+
+  @include md {
+    padding: 0.875rem 1.5rem;
+  }
 }
 
-.docDone {
-  border-color: rgba($success, 0.45);
+.num {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.05rem;
+  border-radius: 0.375rem;
+  background: $slate-100;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: $slate-700;
+  font-variant-numeric: tabular-nums;
+
+  svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    stroke-width: 3;
+  }
 }
 
-.numDone {
-  background: $success !important;
-  color: $white !important;
+.itemDone .num {
+  background: $success;
+  color: $white;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: $navy;
 }
 
 .detailsBtn {
-  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.8125rem;
+  margin-left: -0.375rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: $primary;
 
+  svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
   &:hover {
-    background: rgba($primary, 0.08);
+    background: $brand-50;
   }
 
   &:focus-visible {
-    @include focus-ring(rgba($primary, 0.35));
+    @include focus-ring(rgba($primary, 0.3));
   }
 
   &[aria-expanded="true"] svg {
@@ -74,13 +177,62 @@ $success: #16a34a;
   }
 }
 
-// ---------- Upload area ----------
-.uploadArea {
-  padding: 0 1rem 1rem;
+.points {
+  margin: 0 1.25rem 0.875rem 3.625rem;
+  padding: 0.625rem 0.875rem 0.625rem 1.75rem !important;
+  border: 1px solid $border !important;
+  border-radius: $radius-sm;
+  background: $slate-50;
 
   @include md {
-    padding-left: 3.625rem; // line up with the title, past the number badge
+    margin-right: 1.5rem;
+    margin-left: 3.875rem;
   }
+}
+
+// ---------- Right side: status + actions ----------
+.side {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.status {
+  display: none;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+
+  @include md {
+    display: inline-block;
+  }
+}
+
+.missing {
+  background: $slate-100;
+  color: $slate-500;
+}
+
+.done {
+  background: $success-soft;
+  color: $success;
+}
+
+.error {
+  background: $danger-soft;
+  color: $danger;
+}
+
+p.error {
+  background: none;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .fileInput {
@@ -91,108 +243,79 @@ $success: #16a34a;
   pointer-events: none;
 }
 
-.dropzone {
-  display: flex;
+.uploadBtn,
+.ghostBtn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  min-height: 3.5rem;
-  padding: 0.75rem 1rem;
-  border: 1.5px dashed $slate-300;
-  border-radius: 0.75rem;
-  background: $slate-50;
-  font-size: 0.9375rem;
-  color: $slate-500;
-  text-align: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: $radius-sm;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-
-  strong {
-    color: $primary;
-  }
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 
   svg {
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    color: $primary;
-  }
-
-  &:hover,
-  &.dragging {
-    border-color: $primary;
-    background: rgba($primary, 0.06);
+    width: 0.9375rem;
+    height: 0.9375rem;
   }
 }
 
-.fileInput:focus-visible + .dropzone {
-  @include focus-ring(rgba($primary, 0.35));
-}
-
-.fileChip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.75rem;
-  padding: 0.625rem 0.75rem;
-  border-radius: 0.75rem;
-  background: rgba($success, 0.08);
-  color: $slate-700;
-
-  > svg {
-    flex-shrink: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    color: $success;
-  }
-}
-
-.fileName {
-  flex: 1;
-  min-width: 0;
-  font-weight: 600;
-  color: $navy;
-  overflow-wrap: anywhere;
-}
-
-.fileSize {
-  font-size: 0.8125rem;
-  color: $slate-500;
-}
-
-.linkBtn {
-  font-size: 0.875rem;
-  font-weight: 600;
+.uploadBtn {
+  border: 1px solid $primary;
+  background: $white;
   color: $primary;
 
-  &:hover:not(:disabled) {
-    text-decoration: underline;
+  &:hover {
+    background: $brand-50;
   }
+}
+
+.ghostBtn {
+  border: 1px solid $slate-300;
+  background: $white;
+  color: $slate-700;
+
+  &:hover {
+    background: $slate-100;
+  }
+}
+
+.fileInput:focus-visible + .uploadBtn,
+.fileInput:focus-visible + .ghostBtn {
+  @include focus-ring(rgba($primary, 0.3));
+}
+
+.fileInput:disabled + .uploadBtn,
+.fileInput:disabled + .ghostBtn {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .removeBtn {
   display: grid;
   place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
   color: $slate-500;
 
   svg {
-    width: 1rem;
-    height: 1rem;
+    width: 0.9375rem;
+    height: 0.9375rem;
   }
 
   &:hover:not(:disabled) {
-    background: rgba($danger, 0.1);
+    border-color: rgba($danger, 0.25);
+    background: $danger-soft;
     color: $danger;
   }
-}
 
-.linkBtn,
-.removeBtn {
   &:focus-visible {
-    @include focus-ring(rgba($primary, 0.35));
+    @include focus-ring(rgba($primary, 0.3));
   }
 
   &:disabled {
@@ -201,8 +324,59 @@ $success: #16a34a;
   }
 }
 
-.error {
-  margin-top: 0.375rem;
+// ---------- Attached file ----------
+.fileChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid rgba($success, 0.25);
+  border-radius: 0.375rem;
+  background: $success-soft;
+
+  > svg {
+    flex-shrink: 0;
+    width: 0.875rem;
+    height: 0.875rem;
+    color: $success;
+  }
+}
+
+.fileName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.8125rem;
-  color: $danger;
+  font-weight: 600;
+  color: $slate-800;
+}
+
+.fileSize {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: $slate-500;
+}
+
+// ---------- Footer ----------
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid $border;
+  border-radius: 0 0 $radius $radius;
+  background: $slate-50;
+
+  @include md {
+    padding: 1rem 1.5rem;
+  }
+}
+
+.hint {
+  font-size: 0.8125rem;
+  color: $slate-500;
 }

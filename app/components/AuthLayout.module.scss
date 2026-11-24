@@ -1,48 +1,130 @@
 @use "../styles/variables" as *;
 
 .wrapper {
-  position: relative;
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
-  align-items: center;
-  justify-content: center;
-  padding: 2.5rem 1rem;
+  background: $white;
+}
+
+// ---------- Left: sign-in ----------
+.formPanel {
+  position: relative;
+  display: flex;
+  flex: 1 1 45%;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1.5rem 1rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgba($brand-100, 0.6), transparent 40%),
+    $white;
 
   @include md {
-    justify-content: flex-start;
-    padding-left: 22%;
+    padding: 2rem 3rem;
   }
+}
+
+.brandRow {
+  flex-shrink: 0;
+}
+
+.card {
+  width: 100%;
+  max-width: 24rem;
+  margin: auto;
+  padding: 3rem 0;
+}
+
+.footer {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: $slate-400;
+}
+
+// ---------- Right: imagery ----------
+.visual {
+  position: relative;
+  display: none;
+  flex: 1 1 55%;
+  overflow: hidden;
 
   @include lg {
-    padding-left: 24%;
+    display: flex;
+    align-items: flex-end;
   }
 }
 
 .bg {
-  z-index: -10;
   object-fit: cover;
+  object-position: 70% center;
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  z-index: -10;
-  background: rgba($white, 0.3);
+  background: linear-gradient(
+    180deg,
+    rgba($brand-900, 0.1) 0%,
+    rgba($brand-900, 0.55) 55%,
+    rgba($brand-900, 0.92) 100%
+  );
+}
 
-  @include md {
-    background: transparent;
+.visualContent {
+  position: relative;
+  max-width: 34rem;
+  padding: 3rem;
+  color: $white;
+}
+
+.eyebrow {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba($white, 0.35);
+  border-radius: 999px;
+  background: rgba($white, 0.12);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
+.visualTitle {
+  margin-top: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.trustList {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+  font-size: 0.95rem;
+  color: rgba($white, 0.92);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 }
 
-.card {
-  width: 100%;
-  max-width: 28rem;
-  padding: 2.25rem 2rem;
-  border: 1px solid rgba($white, 0.6);
-  border-radius: 1rem;
-  background: rgba($white, 0.8);
-  box-shadow: 0 20px 25px -5px rgba(12, 74, 110, 0.1), 0 8px 10px -6px rgba(12, 74, 110, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+.trustIcon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: $radius-sm;
+  background: rgba($white, 0.14);
+  color: $brand-100;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
 }

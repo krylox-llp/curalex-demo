@@ -1,22 +1,67 @@
-// Colors
-$white: #ffffff;
-$slate-50: #f8fafc;
-$slate-200: #e2e8f0;
-$slate-300: #cbd5e1;
-$slate-400: #94a3b8;
-$slate-500: #64748b;
-$slate-700: #334155;
-$slate-800: #1e293b;
-$sky-200: #bae6fd;
-$sky-400: #38bdf8;
-$sky-500: #0ea5e9;
-$sky-600: #0284c7;
-$sky-700: #0369a1;
+// ============================================================
+// Clinical design tokens
+// CuraLex: deep medical blue on cool clinical neutrals.
+// ============================================================
 
-$primary: #058fc2;
-$page-bg: #eef7fe;
-$navy: #0f1b4c;
-$danger: #d92d3a;
+// Neutrals (cool blue-grey)
+$white: #ffffff;
+$slate-50: #f6f8fb;
+$slate-100: #eef2f7;
+$slate-200: #e1e7ef;
+$slate-300: #cad3df;
+$slate-400: #8c99ab;
+$slate-500: #5c6a7e;
+$slate-700: #2f3b4f;
+$slate-800: #1c2638;
+
+// Brand: deep medical blue
+$brand-50: #eff5ff;
+$brand-100: #dbe7fd;
+$brand-200: #b8cffa;
+$brand-400: #4f86e8;
+$brand-500: #2563d4;
+$brand-600: #1d4fb8;
+$brand-700: #193f94;
+$brand-800: #173577;
+$brand-900: #0f2552;
+
+// Status blue for "in review" (lighter sky, distinct from brand)
+$sky-status: #0277b5;
+$sky-status-soft: #e6f3fa;
+
+// Legacy aliases (kept so every module picks up the new palette)
+$sky-200: $brand-200;
+$sky-400: $brand-400;
+$sky-500: $brand-500;
+$sky-600: $brand-600;
+$sky-700: $brand-700;
+
+// Semantic
+$primary: $brand-600;
+$primary-hover: $brand-700;
+$primary-soft: $brand-50;
+$navy: #0f1f3a; // headings / ink
+$ink: $navy;
+$page-bg: #f4f7fb;
+$surface: $white;
+$border: $slate-200;
+
+$success: #1f8a4c;
+$success-soft: #e6f5ec;
+$warning: #b26a00;
+$warning-soft: #fff4e0;
+$danger: #c4323f;
+$danger-soft: #fdecee;
+$info: $sky-status;
+$info-soft: $sky-status-soft;
+
+// Elevation & shape
+$radius-sm: 0.5rem;
+$radius: 0.75rem;
+$radius-lg: 1rem;
+$shadow-sm: 0 1px 2px rgba(15, 31, 58, 0.05);
+$shadow: 0 1px 2px rgba(15, 31, 58, 0.04), 0 4px 16px rgba(15, 31, 58, 0.06);
+$shadow-lg: 0 12px 40px rgba(15, 31, 58, 0.14);
 
 // Breakpoints
 $md: 768px;
@@ -34,7 +79,10 @@ $lg: 1024px;
   }
 }
 
-@mixin focus-ring($color) {
-  outline: none;
-  box-shadow: 0 0 0 2px $color;
+// Solid outline (3:1 contrast, survives forced-colors mode, which drops
+// box-shadow) plus the soft halo. Pass $ring: $white on dark surfaces.
+@mixin focus-ring($color, $ring: $primary) {
+  outline: 2px solid $ring;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px $color;
 }

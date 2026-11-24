@@ -1,0 +1,19 @@
+@use "../styles/variables" as *;
+
+// Bare <dialog> shell: the visible panel (e.g. ProductForm .popup) is the
+// child, so the dialog has no padding/border of its own.
+.dialog {
+  width: calc(100% - 2rem);
+  max-width: 30rem;
+  max-height: calc(100dvh - 2rem);
+  margin: auto; // global reset zeroes the UA margin that centres it
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow-y: auto; // long compliance notice lists scroll inside the dialog
+
+  &::backdrop {
+    background: rgba($navy, 0.5);
+    backdrop-filter: blur(2px);
+  }
+}

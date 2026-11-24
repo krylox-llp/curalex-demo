@@ -1,40 +1,28 @@
 @use "sass:map";
 @use "../styles/variables" as *;
 
-// Status variants: main color, ring track, soft card tint, badge bg
+// Regulatory status colours: blue = in review, green = registered, red = action
 $statuses: (
-  inProgress: (
-    color: #1d6ff2,
-    track: #dfe8fb,
-    tint: #e3ecfd,
-    badge: #dbe7fd,
+  review: (
+    color: $info,
+    soft: $info-soft,
   ),
-  completed: (
-    color: #16b864,
-    track: #d9f5e6,
-    tint: #dcf6e8,
-    badge: #d6f3e3,
+  registered: (
+    color: $success,
+    soft: $success-soft,
   ),
-  failed: (
-    color: #ef3340,
-    track: #fcdcdf,
-    tint: #fde4e6,
-    badge: #fddadd,
+  action: (
+    color: $danger,
+    soft: $danger-soft,
   ),
 );
-
-$teal-900: #0b4a4f;
-$teal-700: #0e6b6f;
-$teal-500: #14908f;
-$card-shadow: 0 10px 30px rgba(15, 27, 76, 0.06);
-$card-border: 1px solid rgba(226, 232, 240, 0.9);
 
 .page {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(160deg, #f4f8fd 0%, #eef5fb 100%);
+  background: $page-bg;
 
   @include md {
     flex-direction: row;
@@ -43,512 +31,365 @@ $card-border: 1px solid rgba(226, 232, 240, 0.9);
 
 // ---------- Sidebar ----------
 .sidebar {
-  position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  gap: 1.5rem;
-  padding: 1.25rem 1rem;
-  background: linear-gradient(
-    180deg,
-    $teal-900 0%,
-    $teal-700 55%,
-    $teal-500 100%
-  );
+  gap: 1.25rem;
+  padding: 1rem;
+  background: $brand-900;
   color: $white;
 
   @include md {
     position: sticky;
     top: 0;
     height: 100vh;
-    width: 16.5rem;
-    padding: 2.25rem 1rem;
-    gap: 2.25rem;
-    border-radius: 0 1.5rem 1.5rem 0;
+    width: 15rem;
+    padding: 1.5rem 1rem;
+    gap: 2rem;
   }
-
-  // soft wave at the bottom
-  &::after {
-    content: "";
-    position: absolute;
-    left: -20%;
-    right: -20%;
-    bottom: -6rem;
-    height: 16rem;
-    border-radius: 50% 50% 0 0;
-    background: rgba($white, 0.06);
-    pointer-events: none;
-  }
-}
-
-.brandBlock {
-  padding: 0 1rem;
-}
-
-.logo {
-  width: 3.25rem;
-  height: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.brand {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-  font-weight: 700;
-}
-
-.userName {
-  margin-top: 0.375rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 1rem;
-  color: rgba($white, 0.85);
 }
 
 .nav {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
+}
+
+.navLabel {
+  padding: 0 0.75rem 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba($white, 0.5);
 }
 
 .navItem {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 0.875rem;
-  padding: 0.95rem 1.25rem;
-  border-radius: 1rem;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: $radius-sm;
   text-align: left;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: rgba($white, 0.9);
-  transition: background-color 0.15s ease;
+  color: rgba($white, 0.8);
+  transition: background-color 0.15s ease, color 0.15s ease;
 
   svg {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.125rem;
+    height: 1.125rem;
     flex-shrink: 0;
   }
 
   &:is(button):hover {
-    background: rgba($white, 0.1);
+    background: rgba($white, 0.08);
+    color: $white;
   }
 
   &:focus-visible {
-    @include focus-ring(rgba($white, 0.6));
+    @include focus-ring(rgba($white, 0.4), $white);
   }
 }
 
 .navItemActive {
-  background: rgba($white, 0.18);
+  background: rgba($white, 0.12);
+  box-shadow: inset 3px 0 0 $brand-400;
   font-weight: 600;
   color: $white;
 }
 
 .navItemDisabled {
-  cursor: not-allowed;
-  opacity: 0.75;
+  color: rgba($white, 0.55);
 }
 
-.error {
-  margin: 0 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  background: #fde3e5;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #b4121f;
-}
-
-.sidebarArt {
+.userCard {
   display: none;
-  position: relative;
-  z-index: 1;
-  margin-top: auto;
-  padding: 0 1.5rem 2rem;
-  color: rgba($white, 0.22);
-
-  svg {
-    width: 7.5rem;
-    height: auto;
-  }
-
-  @include md {
-    display: block;
-  }
-}
-
-// ---------- Main ----------
-.main {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  padding: 1.25rem 1rem 2.5rem;
-
-  @include md {
-    padding: 1.75rem 2.5rem 3rem;
-  }
-}
-
-.blob {
-  position: absolute;
-  top: -8rem;
-  right: 18%;
-  width: 22rem;
-  height: 16rem;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(#bfeee0, 0.55),
-    rgba(#bfeee0, 0) 70%
-  );
-  pointer-events: none;
-}
-
-.topBar {
-  position: relative;
-  z-index: 5;
-  display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-
-.bell {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  color: $slate-700;
-
-  svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-}
-
-.bellDot {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.4rem;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: $danger;
-  border: 2px solid $white;
-}
-
-.divider {
-  width: 1px;
-  height: 1.5rem;
-  background: $slate-300;
-}
-
-// Pill-styled country select with globe icon
-.countryWrap {
-  position: relative;
-  flex: 1;
-  max-width: 15rem;
+  gap: 0.625rem;
+  margin-top: auto;
+  padding: 0.75rem;
+  border: 1px solid rgba($white, 0.1);
+  border-radius: $radius;
+  background: rgba($white, 0.05);
 
   @include md {
-    flex: initial;
+    display: flex;
   }
-
-  input {
-    padding-left: 2.75rem;
-    border-radius: 9999px;
-    border-color: $slate-200;
-    box-shadow: $card-shadow;
-  }
-}
-
-.globe {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  left: 1rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  transform: translateY(-50%);
-  color: $slate-700;
-  pointer-events: none;
 }
 
 .avatar {
   display: grid;
   flex-shrink: 0;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #b48cf0, #9b6ee0);
-  font-size: 1.25rem;
-  font-weight: 600;
+  background: $brand-500;
+  font-size: 0.9375rem;
+  font-weight: 700;
   color: $white;
 }
 
-// ---------- Header ----------
-.header {
-  position: relative;
-  margin-top: 1.5rem;
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.8125rem;
+
+  strong,
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: rgba($white, 0.6);
+  }
+}
+
+// ---------- Main ----------
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 1.25rem 1rem 2.5rem;
+
+  @include md {
+    padding: 1.75rem 2rem 3rem;
+  }
+
+  @include lg {
+    padding: 2rem 2.5rem 3rem;
+  }
+}
+
+.topBar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 1rem 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid $border;
 }
 
-.heroIcon {
-  display: grid;
-  place-items: center;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, #e2f4f6, #d2ecf0);
-  font-size: 2.6rem;
-
-  @include md {
-    width: 7rem;
-    height: 7rem;
-    font-size: 3.5rem;
-  }
-}
-
-.headText {
-  flex: 1;
-  min-width: 12rem;
-}
-
-.title {
-  font-size: 1.875rem;
-  line-height: 1.2;
-  font-weight: 800;
-  color: $navy;
-
-  @include md {
-    font-size: 2.75rem;
-  }
-}
-
-.subtitle {
-  margin-top: 0.5rem;
-  font-size: 1.05rem;
+.crumb {
+  font-size: 0.75rem;
+  font-weight: 500;
   color: $slate-500;
 }
 
-.totalChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.1rem;
-  border: 1px solid $slate-200;
-  border-radius: 9999px;
-  background: rgba($white, 0.7);
-  font-size: 0.9rem;
-  color: $slate-700;
+.title {
+  margin-top: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $navy;
+}
 
-  svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
+.topActions {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  width: 100%;
 
-  strong {
-    color: $navy;
+  @include md {
+    width: auto;
   }
 }
 
-// ---------- Status cards ----------
-.cards {
-  margin-top: 1.75rem;
-  display: grid;
-  gap: 1.25rem;
+.market {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
 
-  @include lg {
+.marketLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $slate-500;
+}
+
+.bell {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid $slate-300;
+  border-radius: $radius-sm;
+  background: $white;
+  color: $slate-700;
+
+  svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  &:hover {
+    background: $slate-50;
+  }
+
+  &:focus-visible {
+    @include focus-ring(rgba($primary, 0.2));
+  }
+}
+
+.bellDot {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 2px solid $white;
+  border-radius: 50%;
+  background: $danger;
+}
+
+.error {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgba($danger, 0.25);
+  border-left: 3px solid $danger;
+  border-radius: $radius-sm;
+  background: $danger-soft;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #9e2430;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+// ---------- KPI cards ----------
+.cards {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+
+  @include md {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.75rem;
   }
 }
 
 .card {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  border: $card-border;
-  border-radius: 1.25rem;
-  background: $white;
-  box-shadow: $card-shadow;
-}
-
-.cardText {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.75rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid $border;
+  border-radius: $radius;
+  background: $white;
+  box-shadow: $shadow-sm;
 }
 
-.label {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: $navy;
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
 }
 
-.count {
-  font-size: 0.95rem;
+.cardIcon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: $radius-sm;
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}
+
+.cardLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $slate-700;
+}
+
+.cardValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+
+  strong {
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $navy;
+    font-variant-numeric: tabular-nums;
+  }
+
+  span {
+    font-size: 0.8125rem;
+    color: $slate-500;
+  }
+}
+
+.meter {
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: $slate-100;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    transition: width 0.3s ease;
+  }
+}
+
+.cardHint {
+  font-size: 0.75rem;
   color: $slate-500;
 }
 
-.badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-
-  svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-}
-
-.wave {
-  position: absolute;
-  right: -10%;
-  bottom: -55%;
-  width: 70%;
-  height: 90%;
-  border-radius: 50% 0 0 0;
-  opacity: 0.8;
-  pointer-events: none;
-}
-
-// ---------- Ring ----------
-.ring {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  width: 7.5rem;
-  height: 7.5rem;
-
-  @include md {
-    width: 8.5rem;
-    height: 8.5rem;
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-  }
-}
-
-.track,
-.progress {
-  fill: none;
-  stroke-width: 9;
-}
-
-.progress {
-  stroke-linecap: round;
-  transition:
-    stroke-dashoffset 0.3s ease,
-    stroke-opacity 0.3s ease;
-}
-
-.percent {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.1rem;
-  line-height: 1;
-  font-weight: 800;
-  color: $navy;
-
-  small {
-    margin-top: 0.3rem;
-    font-size: 1rem;
-    font-weight: 700;
-  }
-}
-
-.overall {
-  margin-top: 1.75rem;
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-  padding: 1.25rem;
-  border: $card-border;
-  border-radius: 1.25rem;
+// ---------- Panels ----------
+.panel {
+  margin-top: 1rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid $border;
+  border-radius: $radius;
   background: $white;
-  box-shadow: $card-shadow;
-
-  @include md {
-    padding: 1.25rem 1.75rem 1.25rem 1.25rem;
-  }
+  box-shadow: $shadow-sm;
 }
 
-.trophy {
-  display: none;
-  flex-shrink: 0;
-  place-items: center;
-  width: 7rem;
-  height: 7rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff6dc, #fdeec4);
-  font-size: 3.5rem;
-
-  @include md {
-    display: grid;
-  }
-}
-
-.overallBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.lineHead {
+.panelHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 0.875rem;
 }
 
-.lineTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.3rem;
+.panelTitle {
+  font-size: 1rem;
   font-weight: 700;
   color: $navy;
-
-  svg {
-    width: 1.75rem;
-    height: 1.75rem;
-  }
 }
 
-.recordsChip {
-  padding: 0.35rem 0.9rem;
-  border-radius: 9999px;
-  background: #edf1f6;
-  font-size: 0.9rem;
+.chip {
+  padding: 0.2rem 0.625rem;
+  border: 1px solid $border;
+  border-radius: 999px;
+  background: $slate-50;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: $slate-700;
   white-space: nowrap;
 }
@@ -556,24 +397,24 @@ $card-border: 1px solid rgba(226, 232, 240, 0.9);
 .lineBar {
   display: flex;
   gap: 2px;
-  height: 1.1rem;
+  height: 0.75rem;
   overflow: hidden;
-  border-radius: 9999px;
-  background: $slate-200;
+  border-radius: 999px;
+  background: $slate-100;
 }
 
 .lineSeg {
   height: 100%;
-  border-radius: 9999px;
   transition: width 0.3s ease;
 }
 
 .legend {
+  margin-top: 0.875rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.75rem;
+  gap: 0.5rem 1.5rem;
   list-style: none;
-  font-size: 0.95rem;
+  font-size: 0.8125rem;
   color: $slate-700;
 
   li {
@@ -583,394 +424,147 @@ $card-border: 1px solid rgba(226, 232, 240, 0.9);
   }
 
   strong {
-    margin-left: 0.25rem;
     color: $navy;
+    font-variant-numeric: tabular-nums;
   }
 }
 
 .dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 2px;
 }
 
 // ---------- Bottom row ----------
 .bottom {
-  margin-top: 1.75rem;
   display: grid;
-  gap: 1.25rem;
+  gap: 0 1rem;
 
   @include lg {
-    grid-template-columns: 1.45fr 1.5fr;
-    gap: 1.75rem;
+    grid-template-columns: 1.4fr 1fr;
   }
 }
 
-.quick {
-  padding: 0.25rem 0.5rem;
-  border: $card-border;
-  border-radius: 1.25rem;
-  background: $white;
-  box-shadow: $card-shadow;
-}
-
-.quickTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: $navy;
-}
-
-.quickGrid {
-  margin-top: 1rem;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.quickItem {
+.tasks {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.25rem 0.5rem;
-  text-align: center;
-  color: $slate-700;
+  list-style: none;
 
-  & + & {
-    border-left: 1px solid $slate-200;
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+
+    & + li {
+      border-top: 1px solid $slate-100;
+    }
   }
+}
+
+.taskIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: $radius-sm;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.taskText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: 0.8125rem;
+  color: $slate-500;
 
   strong {
-    margin-top: 0.4rem;
-    font-size: 1.85rem;
-    line-height: 1.1;
-    font-weight: 800;
+    font-size: 0.875rem;
     color: $navy;
   }
-
-  span:last-child {
-    font-size: 0.95rem;
-  }
 }
 
-.quickIcon {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-
-  svg {
-    width: 2.1rem;
-    height: 2.1rem;
-  }
-}
-
-.qBlue {
-  color: #1d6ff2;
-}
-
-.qGreen {
-  border-radius: 50%;
-  background: #16b864;
-  color: $white;
-
-  svg {
-    width: 1.4rem;
-    height: 1.4rem;
-  }
-}
-
-.qRed {
-  color: #ef3340;
-}
-
-.cta {
-  position: relative;
-  overflow: hidden;
+.start {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 1.75rem;
-  border-radius: 1.25rem;
-  background: linear-gradient(120deg, #d7f3e6 0%, #c9efdd 60%, #def6ec 100%);
-  box-shadow: $card-shadow;
+  border-color: $brand-100;
+  background: linear-gradient(180deg, $brand-50, $white);
+}
 
-  &::after {
-    content: "";
-    position: absolute;
-    right: -2rem;
-    bottom: -3rem;
-    width: 16rem;
-    height: 6rem;
-    border-radius: 50%;
-    background: rgba($white, 0.75);
-    pointer-events: none;
+.startHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+
+.startIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: $radius-sm;
+  background: $brand-100;
+  color: $brand-700;
+
+  svg {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 }
 
-.ctaText {
-  position: relative;
-  z-index: 1;
-
-  h3 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: $teal-900;
-  }
-
-  p {
-    margin-top: 0.4rem;
-    color: $slate-700;
-  }
+.startText {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: $slate-500;
 }
 
-.ctaBtn {
-  margin-top: 1.25rem;
+.primaryBtn {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  background: #0a4a43;
+  padding: 0.625rem 1.125rem;
+  border-radius: $radius-sm;
+  background: $primary;
+  font-size: 0.875rem;
   font-weight: 600;
   color: $white;
   transition: background-color 0.15s ease;
 
   &:hover {
-    background: #07362f;
+    background: $primary-hover;
+  }
+
+  &[aria-disabled="true"] {
+    background: $slate-300;
+    color: $white;
   }
 
   &:focus-visible {
-    @include focus-ring(rgba(#0a4a43, 0.4));
+    @include focus-ring(rgba($primary, 0.3));
   }
 }
 
-.rocket {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  font-size: 4.5rem;
-  transform: rotate(-8deg);
-
-  @include md {
-    font-size: 6rem;
-  }
-}
-
-// Generate a modifier class per status
+// ---------- Status modifiers ----------
 @each $name, $c in $statuses {
   .#{$name} {
-    .track {
-      stroke: map.get($c, track);
-    }
-    .progress {
-      stroke: map.get($c, color);
-    }
-    .badge {
-      background: map.get($c, badge);
+    .cardIcon,
+    .taskIcon {
+      background: map.get($c, soft);
       color: map.get($c, color);
     }
-    .wave {
-      background: linear-gradient(
-        160deg,
-        rgba(map.get($c, tint), 0),
-        map.get($c, tint)
-      );
-    }
+    .meter span,
     &.lineSeg,
     .dot {
       background: map.get($c, color);
     }
-  }
-}
-
-.completed .badge {
-  background: #16b864;
-  color: $white;
-  box-shadow: 0 0 0 6px #d6f3e3;
-}
-
-// ---------- Fit whole dashboard inside the viewport (no page scroll) ----------
-// On desktop every section scales with the viewport height (vh) so the
-// layout always fits in one screen. Smaller screens keep normal scrolling.
-@include lg {
-  .page {
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-  }
-
-  .sidebar {
-    height: 100%;
-    padding: clamp(1.25rem, 3.5vh, 2.25rem) 1rem;
-    gap: clamp(1rem, 3.5vh, 2.25rem);
-  }
-
-  .sidebarArt {
-    padding-bottom: clamp(0.75rem, 2.5vh, 2rem);
-
-    svg {
-      width: clamp(5rem, 11vh, 7.5rem);
-    }
-  }
-
-  .main {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: clamp(0.875rem, 2.4vh, 1.75rem) 2.5rem clamp(1rem, 3vh, 2rem);
-  }
-
-  .topBar {
-    flex-shrink: 0;
-  }
-
-  .header {
-    flex-shrink: 0;
-    margin-top: clamp(0rem, 0.8vh, 1rem);
-  }
-
-  .heroIcon {
-    width: clamp(3.75rem, 10vh, 7rem);
-    height: clamp(3.75rem, 10vh, 7rem);
-
-    img {
-      width: 55%;
-      height: auto;
-    }
-  }
-
-  .title {
-    font-size: clamp(1.75rem, 4.2vh, 2.75rem);
-  }
-
-  .subtitle {
-    margin-top: clamp(0.125rem, 0.6vh, 0.5rem);
-    font-size: clamp(0.875rem, 1.8vh, 1.05rem);
-  }
-
-  .cards,
-  .overall,
-  .bottom {
-    flex-shrink: 0;
-    margin-top: clamp(0.75rem, 2.2vh, 1.75rem);
-  }
-
-  // Status cards grow to take the spare height
-  .cards {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: 12.5rem;
-  }
-
-  .card {
-    padding: clamp(0.875rem, 2.2vh, 1.5rem) 1.25rem;
-  }
-
-  .label {
-    font-size: clamp(1.1rem, 2.4vh, 1.35rem);
-  }
-
-  .badge {
-    width: clamp(2.25rem, 4.8vh, 3rem);
-    height: clamp(2.25rem, 4.8vh, 3rem);
-
-    svg {
-      width: 55%;
-      height: 55%;
-    }
-  }
-
-  .ring {
-    width: clamp(5rem, 13.5vh, 9rem);
-    height: clamp(5rem, 13.5vh, 9rem);
-  }
-
-  .percent {
-    font-size: clamp(1.4rem, 3vh, 2.1rem);
-
-    small {
-      margin-top: 0.15rem;
-      font-size: clamp(0.8rem, 1.5vh, 1rem);
-    }
-  }
-
-  // Overall progress: only as tall as its content
-  .overall {
-    flex: 0 0 auto;
-    padding: clamp(0.875rem, 2vh, 1.5rem) 1.75rem clamp(0.875rem, 2vh, 1.5rem)
-      1.25rem;
-  }
-
-  .lineBar {
-    height: clamp(1.1rem, 2.2vh, 1.5rem);
-  }
-
-  .trophy {
-    width: clamp(3.75rem, 9vh, 7rem);
-    height: clamp(3.75rem, 9vh, 7rem);
-
-    img {
-      width: 55%;
-      height: auto;
-    }
-  }
-
-  .overallBody {
-    gap: clamp(0.75rem, 2.2vh, 1.5rem);
-  }
-
-  .lineTitle,
-  .quickTitle {
-    font-size: clamp(1.1rem, 2.3vh, 1.3rem);
-  }
-
-  // Bottom row only as tall as its content
-  .bottom {
-    flex: 0 0 auto;
-  }
-
-  .quick {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 0;
-    padding: clamp(0.75rem, 1.8vh, 1.25rem) 1.5rem;
-  }
-
-  .quickGrid {
-    margin-top: clamp(0.5rem, 1.5vh, 1rem);
-  }
-
-  .quickIcon {
-    width: clamp(2rem, 4vh, 2.5rem);
-    height: clamp(2rem, 4vh, 2.5rem);
-  }
-
-  .quickItem strong {
-    margin-top: 0.25rem;
-    font-size: clamp(1.4rem, 3vh, 1.85rem);
-  }
-
-  .cta {
-    min-height: 0;
-    padding: clamp(0.75rem, 2vh, 1.5rem) 1.75rem;
-  }
-
-  .ctaText h3 {
-    font-size: clamp(1.35rem, 3vh, 1.75rem);
-  }
-
-  .ctaBtn {
-    margin-top: clamp(0.625rem, 2vh, 1.25rem);
-    padding: clamp(0.5rem, 1.3vh, 0.75rem) 1.5rem;
-  }
-
-  .rocketImg {
-    width: clamp(3.5rem, 8vh, 5rem);
-    height: auto;
   }
 }

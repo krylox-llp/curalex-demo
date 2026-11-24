@@ -1,28 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.scss";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sans = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const mono = Geist_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Pharma",
-  description: "Pharma login",
+  title: "CuraLex · Regulatory Registration",
+  description: "Secure pharmaceutical product registration portal",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { PRODUCT_STORAGE_KEY } from "./ProductForm";
 import formStyles from "./ProductForm.module.scss";
 import styles from "./ProductSummary.module.scss";
 import { Icon, type IconName } from "./Icon";
 import LoadingScreen from "./LoadingScreen";
+import AppBar from "./AppBar";
+import Modal from "./Modal";
 import { REGULATORY_DOCS } from "../data/regulatoryDocs";
 
 type Payload = Record<string, string | string[] | undefined>;
@@ -41,6 +43,7 @@ export default function ProductSummary({ country }: { country: string }) {
   const [acknowledged, setAcknowledged] = useState(false);
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
+  const requestRef = useRef<HTMLButtonElement>(null);
 
   const emailValid = EMAIL_RE.test(email.trim());
   const emailError =
@@ -86,130 +89,161 @@ export default function ProductSummary({ country }: { country: string }) {
   const closePopup = () => setStatus({ type: "idle" });
 
   return (
-    <div className={formStyles.page}>
-      <header className={formStyles.header}>
-        <div>
-          <Link href={back} className={formStyles.back}>
-            ← Back to form
-          </Link>
-          <h1 className={formStyles.title}>Product Summary</h1>
-          <p className={formStyles.subtitle}>
-            Review the submitted registration details.
-          </p>
-        </div>
-        <span className={formStyles.countryBadge}>
-          Country: <strong>{country || "Not selected"}</strong>
-        </span>
-      </header>
+    <div className={formStyles.shell}>
+      <AppBar country={country} back={{ href: back, label: "Back to form" }} />
+      <div className={formStyles.page}>
+        <header className={formStyles.header}>
+          <div>
+            <p className={formStyles.eyebrow}>Documents &amp; declaration</p>
+            <h1 className={formStyles.title}>Product Summary</h1>
+            <p className={formStyles.subtitle}>
+              Review the required documents, accept the declaration and request
+              the document upload link for the trade owner.
+            </p>
+          </div>
+        </header>
 
-      <div className={styles.card}>
-        {!data ? (
-          <p className={styles.empty}>
-            No submitted product found. Please fill the form first.
-          </p>
-        ) : (
-          <>
-            <Section
-              id="regulatory"
-              title="Documents required for product registration with NAFDAC:"
-              icon="file"
-              open={open.includes("regulatory")}
-              onToggle={toggle}
-            >
-              <ol className={styles.docList}>
-                {REGULATORY_DOCS.map((doc, i) => (
-                  <DocAccordion key={doc.title} index={i + 1} doc={doc} />
-                ))}
-              </ol>
-            </Section>
+        {data && (
+          <ol className={styles.tracker} aria-label="Registration progress">
+            {[
+              { label: "Product details", done: true },
+              { label: "Declaration accepted", done: acknowledged },
+              { label: "Trade owner email", done: emailValid },
+              {
+                label: "Document request sent",
+                done: status.type === "success",
+              },
+            ].map((step, i) => (
+              <li
+                key={step.label}
+                className={step.done ? styles.trackDone : undefined}
+              >
+                <span className={styles.trackDot}>
+                  {step.done ? <Icon name="tick" /> : i + 1}
+                </span>
+                {step.label}
+              </li>
+            ))}
+          </ol>
+        )}
 
-            <Section
-              id="declaration"
-              title="Declaration & Acknowledgement"
-              icon="check"
-              open={open.includes("declaration")}
-              onToggle={toggle}
-            >
-              <div className={styles.declaration}>
-                <p>
-                  I/We hereby declare that the information provided in this
-                  application is true, complete and accurate to the best of
-                  my/our knowledge.
-                </p>
-                <p>
-                  I/We understand that providing false or misleading information
-                  may lead to rejection of the application or cancellation of
-                  the registration.
-                </p>
-                <p>
-                  I/We undertake to submit all supporting documents listed under
-                  Regulatory Information.
-                </p>
+        <div className={styles.card}>
+          <div className={styles.cardBody}>
+            {!data ? (
+              <p className={styles.empty}>
+                No saved product details found. Please complete the Import
+                Register form first.
+              </p>
+            ) : (
+              <>
+                <Section
+                  id="regulatory"
+                  title={`Required documents · ${REGULATORY_DOCS.length} documents required by NAFDAC`}
+                  icon="file"
+                  open={open.includes("regulatory")}
+                  onToggle={toggle}
+                >
+                  <ol className={styles.docList}>
+                    {REGULATORY_DOCS.map((doc, i) => (
+                      <DocAccordion key={doc.title} index={i + 1} doc={doc} />
+                    ))}
+                  </ol>
+                </Section>
 
-                <div className={styles.emailField}>
-                  <label htmlFor="ackEmail" className={styles.emailLabel}>
-                    Trade Owner Email ID{" "}
-                    <span className={styles.required}>*</span>
-                  </label>
-                  <div
-                    className={`${styles.emailInputWrap} ${emailError ? styles.emailInvalid : ""}`}
-                  >
-                    <Icon name="mail" />
-                    <input
-                      id="ackEmail"
-                      type="email"
-                      inputMode="email"
-                      autoComplete="email"
-                      placeholder="Enter here"
-                      value={email}
-                      aria-invalid={!!emailError || undefined}
-                      aria-describedby={
-                        emailError ? "ackEmail-error" : undefined
-                      }
-                      onChange={(e) => setEmail(e.target.value)}
-                      onBlur={() => setEmailTouched(true)}
-                    />
-                  </div>
-                  {emailError && (
-                    <p id="ackEmail-error" className={styles.emailError}>
-                      {emailError}
+                <Section
+                  id="declaration"
+                  title="Declaration & Acknowledgement"
+                  icon="check"
+                  open={open.includes("declaration")}
+                  onToggle={toggle}
+                >
+                  <div className={styles.declaration}>
+                    <p>
+                      I/We hereby declare that the information provided in this
+                      application is true, complete and accurate to the best of
+                      my/our knowledge.
                     </p>
-                  )}
-                </div>
+                    <p>
+                      I/We understand that providing false or misleading
+                      information may lead to rejection of the application or
+                      cancellation of the registration.
+                    </p>
+                    <p>
+                      I/We undertake to submit all supporting documents listed
+                      under Required Documents.
+                    </p>
 
-                <label className={styles.ack}>
-                  <input
-                    type="checkbox"
-                    checked={acknowledged}
-                    onChange={(e) => setAcknowledged(e.target.checked)}
-                  />
-                  I have read and agree to the above declaration.
-                </label>
-              </div>
-            </Section>
-          </>
-        )}
-      </div>
+                    <div className={styles.emailField}>
+                      <label htmlFor="ackEmail" className={styles.emailLabel}>
+                        Trade Owner Email ID{" "}
+                        <span className={styles.required}>*</span>
+                      </label>
+                      <div
+                        className={`${styles.emailInputWrap} ${emailError ? styles.emailInvalid : ""}`}
+                      >
+                        <Icon name="mail" />
+                        <input
+                          id="ackEmail"
+                          type="email"
+                          inputMode="email"
+                          autoComplete="email"
+                          placeholder="name@company.com"
+                          value={email}
+                          aria-invalid={!!emailError || undefined}
+                          aria-describedby={
+                            emailError ? "ackEmail-error" : undefined
+                          }
+                          onChange={(e) => setEmail(e.target.value)}
+                          onBlur={() => setEmailTouched(true)}
+                        />
+                      </div>
+                      {emailError && (
+                        <p id="ackEmail-error" className={styles.emailError}>
+                          {emailError}
+                        </p>
+                      )}
+                    </div>
 
-      <div className={styles.actions}>
-        {data && !canSend && (
-          <span className={styles.hint}>
-            Enter your email ID and accept the declaration to request email.
-          </span>
-        )}
-        <Link href={back} className={`${styles.btn} ${styles.btnSecondary}`}>
-          <Icon name="pencil" />
-          Edit
-        </Link>
-        <button
-          type="button"
-          className={`${styles.btn} ${styles.btnPrimary}`}
-          disabled={!canSend || status.type === "sending"}
-          onClick={handleRequestEmail}
-        >
-          <Icon name="mail" />
-          Request Document
-        </button>
+                    <label className={styles.ack}>
+                      <input
+                        type="checkbox"
+                        checked={acknowledged}
+                        onChange={(e) => setAcknowledged(e.target.checked)}
+                      />
+                      I have read and agree to the above declaration.
+                    </label>
+                  </div>
+                </Section>
+              </>
+            )}
+          </div>
+
+          <div className={styles.actions}>
+            {data && !canSend && (
+              <span className={styles.hint}>
+                Enter the Trade Owner email and accept the declaration to
+                continue.
+              </span>
+            )}
+            <Link
+              href={back}
+              className={`${styles.btn} ${styles.btnSecondary}`}
+            >
+              <Icon name="pencil" />
+              Edit
+            </Link>
+            <button
+              ref={requestRef}
+              type="button"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={!canSend || status.type === "sending"}
+              onClick={handleRequestEmail}
+            >
+              <Icon name="mail" />
+              Request Documents
+            </button>
+          </div>
+        </div>
       </div>
 
       {status.type === "sending" && (
@@ -217,47 +251,46 @@ export default function ProductSummary({ country }: { country: string }) {
       )}
 
       {(status.type === "success" || status.type === "error") && (
-        <div className={formStyles.overlay} onClick={closePopup}>
-          <div
-            role={status.type === "error" ? "alertdialog" : "dialog"}
-            aria-modal="true"
-            aria-labelledby="email-popup-title"
-            className={`${formStyles.popup} ${
-              status.type === "success"
-                ? formStyles.popupSuccess
-                : formStyles.popupWarning
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className={formStyles.popupIcon} aria-hidden>
-              {status.type === "success" ? "✓" : "!"}
-            </span>
-            <h2 id="email-popup-title" className={formStyles.popupTitle}>
-              {status.type === "success" ? "Email Sent" : "Email Not Sent"}
-            </h2>
-            <p className={formStyles.popupText}>
-              {status.type === "success" ? (
-                <>
-                  Please check your Trade Owner email
-                  <br />
-                  <strong>{status.to}</strong>
-                </>
-              ) : (
-                status.message
-              )}
-            </p>
-            <div className={formStyles.popupActions}>
-              <button
-                type="button"
-                className={formStyles.primary}
-                onClick={closePopup}
-                autoFocus
-              >
-                OK
-              </button>
-            </div>
+        <Modal
+          labelledBy="email-popup-title"
+          returnFocusTo={requestRef}
+          alert={status.type === "error"}
+          className={`${formStyles.popup} ${
+            status.type === "success"
+              ? formStyles.popupSuccess
+              : formStyles.popupWarning
+          }`}
+          onClose={closePopup}
+        >
+          <span className={formStyles.popupIcon} aria-hidden>
+            <Icon name={status.type === "success" ? "check" : "alert"} />
+          </span>
+          <h2 id="email-popup-title" className={formStyles.popupTitle}>
+            {status.type === "success" ? "Request sent" : "Request not sent"}
+          </h2>
+          <p className={formStyles.popupText}>
+            {status.type === "success" ? (
+              <>
+                The document request has been sent to the Trade Owner at{" "}
+                <strong>{status.to}</strong>. They can use the link in the email
+                to upload the documents needed to register the product in{" "}
+                {country || "the target market"}.
+              </>
+            ) : (
+              status.message
+            )}
+          </p>
+          <div className={formStyles.popupActions}>
+            <button
+              type="button"
+              className={formStyles.primary}
+              onClick={closePopup}
+              data-autofocus
+            >
+              OK
+            </button>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

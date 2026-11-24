@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SearchSelect from "./SearchSelect";
 import LoadingScreen from "./LoadingScreen";
+import Modal from "./Modal";
+import AppBar from "./AppBar";
+import { Icon } from "./Icon";
+import { CEILING_LIST_APIS, ceilingMatches } from "../data/ceilingList";
 import styles from "./ProductForm.module.scss";
 
 // Demo master data — replace with API data later
@@ -20,7 +23,7 @@ const DOSAGE_FORMS = [
   "Suspension",
 ];
 const ROUTES = ["Oral", "IV", "IM", "SC", "Topical", "Inhalation"];
-const MOLECULES_API = [
+const WHO_PQ_APIS = [
   "Abacavir (sulfate)",
   "Albendazole",
   "Amodiaquine (hydrochloride)",
@@ -85,7 +88,13 @@ const MOLECULES_API = [
   "Zinc (sulfate)",
 ];
 
-async function fetchSmartApi(inn: string): Promise<string[]> {
+// Picker options: existing APIs plus every API on the NAFDAC ceiling list
+const MOLECULES_API = [...new Set([...WHO_PQ_APIS, ...CEILING_LIST_APIS])].sort(
+  (a, b) => a.localeCompare(b),
+);
+
+/** Manufacturer names for an API, or null if the lookup failed */
+async function fetchSmartApi(inn: string): Promise<string[] | null> {
   console.log("smart-api request:", { inn });
   try {
     const res = await fetch("/api/smart-api", {
@@ -96,7 +105,7 @@ async function fetchSmartApi(inn: string): Promise<string[]> {
     const json = await res.json().catch(() => null);
     if (!res.ok) {
       console.error(`smart-api error (${inn}):`, res.status, json);
-      return [];
+      return null;
     }
     const rows: { id: number; name: string }[] = json?.data ?? [];
     console.log(`smart-api response for "${inn}":`, json);
@@ -104,7 +113,7 @@ async function fetchSmartApi(inn: string): Promise<string[]> {
     return rows.map((r) => r.name).filter(Boolean);
   } catch (err) {
     console.error("smart-api error:", err);
-    return [];
+    return null;
   }
 }
 
@@ -169,32 +178,42 @@ const EMPTY: FormState = {
   trademarkOwner: [],
 };
 
-const WARNING_RULES: {
-  field: "genericName" | "apis";
-  value: string;
+export type ComplianceNotice = {
+  title: string;
   message: string;
-}[] = [
+  reference: string;
+};
+
+// Excipient flags; API flags come from the NAFDAC ceiling list
+const WARNING_RULES: ({
+  field: "genericName";
+  value: string;
+} & ComplianceNotice)[] = [
   {
     field: "genericName",
     value: "Glycerol",
+    title: "DEG / EG contamination risk — Glycerol",
     message:
-      "Sampling and testing of raw materials and excipients can be used to detect the presence of DEG.",
-  },
-  {
-    field: "apis",
-    value: "Albendazole",
-    message: "API Albendazole is in NAFDAC ceiling list.",
+      "Glycerol is considered a high-risk excipient, as it is often contaminated with toxic substances such as DEG. Controls should be taken to ensure that glycerol is of the required purity, and not contaminated with a contaminant (such as DEG) that can cause death when ingested.",
+    reference: "Excipient quality control · DEG/EG screening",
   },
 ];
 
-function getWarnings(f: FormState): string[] {
-  return WARNING_RULES.filter((r) => {
-    const values =
-      r.field === "apis" ? f.apiManufacturers.map((p) => p.api) : f[r.field];
-    return values.some(
-      (v) => v.trim().toLowerCase() === r.value.toLowerCase(),
-    );
-  }).map((r) => r.message);
+function getWarnings(f: FormState): ComplianceNotice[] {
+  const excipients = WARNING_RULES.filter((r) =>
+    f[r.field].some((v) => v.trim().toLowerCase() === r.value.toLowerCase()),
+  ).map(({ title, message, reference }) => ({ title, message, reference }));
+
+  const ceiling = ceilingMatches(
+    f.apiManufacturers.map((p) => p.api),
+    f.route,
+  ).map((c) => ({
+    title: `Ceiling list flag — ${c.label}`,
+    message: `${c.label} (${c.dosageForms.toLowerCase()}) is on the NAFDAC ceiling list. This list restricts the registration of imported finished products that are adequately manufactured locally, so a new import registration for this product may not be accepted. Confirm the current status with NAFDAC before preparing the dossier.`,
+    reference: `NAFDAC ceiling list 2026 · item ${c.sn}`,
+  }));
+
+  return [...excipients, ...ceiling];
 }
 
 /** How long the submit loader shows before the popup appears */
@@ -202,7 +221,23 @@ const LOADER_MS = 1500;
 
 export const PRODUCT_STORAGE_KEY = "importRegisterProduct";
 
-type Popup = { type: "warning"; messages: string[] } | { type: "success" };
+type Popup =
+  { type: "warning"; notices: ComplianceNotice[] } | { type: "success" };
+
+/** Error key → id of the control to focus, in on-screen order */
+const FIELD_ORDER: [keyof Errors, string][] = [
+  ["productClass", "productClass"],
+  ["category", "category"],
+  ["brandName", "brandName"],
+  ["genericName", "genericName"],
+  ["apiManufacturers", "apis"],
+  ["strengths", "strengths-0"],
+  ["packSizes", "packSizes-0"],
+  ["dosageForm", "dosageForm"],
+  ["route", "route"],
+];
+
+const errorId = (id: string) => `${id}-error`;
 
 function validate(f: FormState): Errors {
   const e: Errors = {};
@@ -210,17 +245,15 @@ function validate(f: FormState): Errors {
   if (!f.category) e.category = "Select a category";
   if (!f.brandName.trim()) e.brandName = "Enter the brand name";
   if (!f.genericName.length) e.genericName = "Select or enter the generic name";
-  if (!f.strengths.some((s) => s.trim()))
-    e.strengths = "Enter at least one strength";
+  if (!f.strengths.some((s) => s.trim())) e.strengths = "Enter the strength";
   if (!f.dosageForm) e.dosageForm = "Select a dosage form";
   if (!f.route) e.route = "Select a route";
-  if (!f.packSizes.some((s) => s.trim()))
-    e.packSizes = "Enter at least one pack size";
+  if (!f.packSizes.some((s) => s.trim())) e.packSizes = "Enter the pack size";
   if (!f.apiManufacturers.length)
     e.apiManufacturers =
       f.apis.length && f.manufacturer.length
-        ? "Click “Add” to add the selected API and manufacturer"
-        : "Select an API and manufacturer, then click “Add”";
+        ? "Click “Add pair” to add the selected API and manufacturer"
+        : "Select an API and manufacturer, then click “Add pair”";
   return e;
 }
 
@@ -229,10 +262,13 @@ export default function ProductForm({ country }: { country: string }) {
   const [errors, setErrors] = useState<Errors>({});
   const [popup, setPopup] = useState<Popup | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const submitRef = useRef<HTMLButtonElement>(null);
   const [manufacturersByApi, setManufacturersByApi] = useState<
     Record<string, string[]>
   >({});
   const [loadingApis, setLoadingApis] = useState<string[]>([]);
+  // APIs whose lookup failed; not cached, so selecting the API again retries
+  const [failedApis, setFailedApis] = useState<string[]>([]);
   const manufacturerOptions = manufacturersFor(form.apis, manufacturersByApi);
   const router = useRouter();
   const [formKey, setFormKey] = useState(0);
@@ -249,7 +285,12 @@ export default function ProductForm({ country }: { country: string }) {
     if (submitting) return;
     const errs = validate(form);
     setErrors(errs);
-    if (Object.keys(errs).length) return;
+    const firstInvalid = FIELD_ORDER.find(([key]) => errs[key]);
+    if (firstInvalid) {
+      // Focus reads the field's label, "invalid" and its linked error message
+      document.getElementById(firstInvalid[1])?.focus();
+      return;
+    }
 
     // Show the loader first; the warning / success popup appears after it
     setSubmitting(true);
@@ -258,7 +299,7 @@ export default function ProductForm({ country }: { country: string }) {
 
     const warnings = getWarnings(form);
     if (warnings.length) {
-      setPopup({ type: "warning", messages: warnings });
+      setPopup({ type: "warning", notices: warnings });
       return;
     }
 
@@ -301,8 +342,10 @@ export default function ProductForm({ country }: { country: string }) {
       .filter((inn) => !form.apis.includes(inn) && !manufacturersByApi[inn])
       .forEach(async (inn) => {
         setLoadingApis((l) => [...l, inn]);
+        setFailedApis((f) => f.filter((x) => x !== inn));
         const names = await fetchSmartApi(inn);
-        setManufacturersByApi((m) => ({ ...m, [inn]: names }));
+        if (names) setManufacturersByApi((m) => ({ ...m, [inn]: names }));
+        else setFailedApis((f) => [...f, inn]);
         setLoadingApis((l) => l.filter((x) => x !== inn));
       });
   }
@@ -315,7 +358,10 @@ export default function ProductForm({ country }: { country: string }) {
       (p) => p.api === api && p.manufacturer === manufacturer,
     );
     if (!exists) {
-      set("apiManufacturers", [...form.apiManufacturers, { api, manufacturer }]);
+      set("apiManufacturers", [
+        ...form.apiManufacturers,
+        { api, manufacturer },
+      ]);
     }
     set("apis", []);
     set("manufacturer", []);
@@ -337,225 +383,268 @@ export default function ProductForm({ country }: { country: string }) {
   }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <Link href="/register" className={styles.back}>
-            ← Back to dashboard
-          </Link>
-          <h1 className={styles.title}>Import Register</h1>
-          <p className={styles.subtitle}>
-            Enter the product registration details.
-          </p>
-        </div>
-        <span className={styles.countryBadge}>
-          Country: <strong>{country || "Not selected"}</strong>
-        </span>
-      </header>
-
-      <form
-        key={formKey}
-        className={styles.card}
-        onSubmit={handleSubmit}
-        noValidate
-      >
-        <div className={styles.grid}>
-          <Field
-            label="Product Class"
-            htmlFor="productClass"
-            error={errors.productClass}
-          >
-            <Select
-              id="productClass"
-              value={form.productClass}
-              options={PRODUCT_CLASSES}
-              placeholder="Select product class"
-              invalid={!!errors.productClass}
-              onChange={(v) => set("productClass", v)}
-            />
-          </Field>
-
-          <Field label="Category" htmlFor="category" error={errors.category}>
-            <Select
-              id="category"
-              value={form.category}
-              options={CATEGORIES}
-              placeholder="Select category"
-              invalid={!!errors.category}
-              onChange={(v) => set("category", v)}
-            />
-          </Field>
-
-          <Field
-            label="Brand Name"
-            htmlFor="brandName"
-            error={errors.brandName}
-          >
-            <input
-              id="brandName"
-              type="text"
-              className={`${styles.input} ${errors.brandName ? styles.invalid : ""}`}
-              placeholder="e.g. Dolo"
-              value={form.brandName}
-              onChange={(e) => set("brandName", e.target.value)}
-            />
-          </Field>
-
-          <Field
-            label="Excipients (INN)"
-            htmlFor="genericName"
-            error={errors.genericName}
-          >
-            <SearchSelect
-              id="genericName"
-              options={MOLECULES}
-              value={form.genericName}
-              allowCustom
-              placeholder="e.g. Paracetamol"
-              invalid={!!errors.genericName}
-              onChange={(v) => set("genericName", v)}
-            />
-          </Field>
-
-          <Field label="API(s)" htmlFor="apis" error={errors.apis}>
-            <SearchSelect
-              key={`apis-${pickKey}`}
-              id="apis"
-              options={MOLECULES_API}
-              value={form.apis}
-              placeholder="Search and select APIs"
-              invalid={!!errors.apis}
-              onChange={handleApisChange}
-            />
-          </Field>
-
-          <Field
-            label="Manufacturer Name / Factory"
-            htmlFor="manufacturer"
-            error={errors.manufacturer}
-          >
-            <SearchSelect
-              key={`manufacturer-${pickKey}`}
-              id="manufacturer"
-              options={manufacturerOptions}
-              value={form.manufacturer}
-              placeholder={
-                !form.apis.length
-                  ? "Select API(s) first"
-                  : loadingApis.some((a) => form.apis.includes(a))
-                    ? "Loading manufacturers…"
-                    : "Search company / factory"
-              }
-              invalid={!!errors.manufacturer}
-              onChange={(v) => set("manufacturer", v)}
-            />
-          </Field>
-
-          <div className={`${styles.wide} ${styles.pairArea}`}>
-            {form.apis.length > 0 && form.manufacturer.length > 0 && (
-              <button
-                type="button"
-                className={styles.pairAddBtn}
-                onClick={handleAddApiManufacturer}
-              >
-                + Add
-              </button>
-            )}
-
-            {form.apiManufacturers.length > 0 && (
-              <table className={styles.pairTable}>
-                <thead>
-                  <tr>
-                    <th scope="col">API</th>
-                    <th scope="col">Manufacturer</th>
-                    <th scope="col">
-                      <span className={styles.srOnly}>Remove</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {form.apiManufacturers.map((p, i) => (
-                    <tr key={`${p.api}|${p.manufacturer}`}>
-                      <td>{p.api}</td>
-                      <td>{p.manufacturer}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className={styles.pairRemove}
-                          aria-label={`Remove ${p.api} – ${p.manufacturer}`}
-                          onClick={() => removeApiManufacturer(i)}
-                        >
-                          ×
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {errors.apiManufacturers && (
-              <p className={styles.error}>{errors.apiManufacturers}</p>
-            )}
+    <div className={styles.shell}>
+      <AppBar
+        country={country}
+        back={{ href: "/register", label: "Back to overview" }}
+      />
+      <div className={styles.page}>
+        <header className={styles.header}>
+          <div>
+            <p className={styles.eyebrow}>New registration</p>
+            <h1 className={styles.title}>Import Register</h1>
+            <p className={styles.subtitle}>
+              Enter the product details for registration in{" "}
+              {country || "the selected market"}. All fields marked{" "}
+              <span className={styles.required}>*</span> are required.
+            </p>
           </div>
+          <ol className={styles.stepper} aria-label="Form sections">
+            <li>Product identity</li>
+            <li>APIs &amp; manufacturers</li>
+            <li>Presentation</li>
+          </ol>
+        </header>
 
-          <Field
-            label="Strength(s)"
-            htmlFor="strengths-0"
-            error={errors.strengths}
+        <form
+          key={formKey}
+          className={styles.card}
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <Step
+            n={1}
+            title="Product identity"
+            desc="Classification and naming as it will appear in the registration application."
           >
-            <Repeatable
-              idPrefix="strengths"
-              values={form.strengths}
-              placeholder="e.g. 500 mg"
-              addLabel="Add strength"
-              invalid={!!errors.strengths}
-              onChange={(v) => set("strengths", v)}
-            />
-          </Field>
+            <Field
+              label="Product Class"
+              htmlFor="productClass"
+              error={errors.productClass}
+            >
+              <Select
+                id="productClass"
+                value={form.productClass}
+                options={PRODUCT_CLASSES}
+                placeholder="Select product class"
+                invalid={!!errors.productClass}
+                onChange={(v) => set("productClass", v)}
+              />
+            </Field>
 
-          <Field
-            label="Pack Sizes"
-            htmlFor="packSizes-0"
-            error={errors.packSizes}
+            <Field label="Category" htmlFor="category" error={errors.category}>
+              <Select
+                id="category"
+                value={form.category}
+                options={CATEGORIES}
+                placeholder="Select category"
+                invalid={!!errors.category}
+                onChange={(v) => set("category", v)}
+              />
+            </Field>
+
+            <Field
+              label="Brand Name"
+              htmlFor="brandName"
+              error={errors.brandName}
+            >
+              <input
+                id="brandName"
+                type="text"
+                className={`${styles.input} ${errors.brandName ? styles.invalid : ""}`}
+                placeholder="e.g. Dolo"
+                value={form.brandName}
+                required
+                aria-invalid={!!errors.brandName}
+                aria-describedby={
+                  errors.brandName ? errorId("brandName") : undefined
+                }
+                onChange={(e) => set("brandName", e.target.value)}
+              />
+            </Field>
+
+            <Field
+              label="Excipients (INN)"
+              htmlFor="genericName"
+              error={errors.genericName}
+            >
+              <SearchSelect
+                required
+                id="genericName"
+                options={MOLECULES}
+                value={form.genericName}
+                allowCustom
+                placeholder="e.g. Glycerol"
+                invalid={!!errors.genericName}
+                describedBy={
+                  errors.genericName ? errorId("genericName") : undefined
+                }
+                onChange={(v) => set("genericName", v)}
+              />
+            </Field>
+          </Step>
+
+          <Step
+            n={2}
+            title="APIs & manufacturers"
+            desc="Pair each active ingredient with its manufacturing site, then click Add pair."
           >
-            <Repeatable
-              idPrefix="packSizes"
-              values={form.packSizes}
-              placeholder="e.g. 10 Tablets"
-              addLabel="Add pack size"
-              invalid={!!errors.packSizes}
-              onChange={(v) => set("packSizes", v)}
-            />
-          </Field>
+            <Field label="API(s)" htmlFor="apis" error={errors.apis}>
+              <SearchSelect
+                required
+                key={`apis-${pickKey}`}
+                id="apis"
+                options={MOLECULES_API}
+                value={form.apis}
+                placeholder="Search and select APIs"
+                invalid={!!errors.apis || !!errors.apiManufacturers}
+                describedBy={
+                  errors.apiManufacturers ? "apiManufacturers-error" : undefined
+                }
+                onChange={handleApisChange}
+              />
+            </Field>
 
-          <Field
-            label="Dosage Form"
-            htmlFor="dosageForm"
-            error={errors.dosageForm}
+            <Field
+              label="Manufacturer Name / Factory"
+              htmlFor="manufacturer"
+              error={errors.manufacturer}
+            >
+              <SearchSelect
+                required
+                key={`manufacturer-${pickKey}`}
+                id="manufacturer"
+                options={manufacturerOptions}
+                value={form.manufacturer}
+                placeholder={
+                  !form.apis.length
+                    ? "Select API(s) first"
+                    : loadingApis.some((a) => form.apis.includes(a))
+                      ? "Loading manufacturers…"
+                      : failedApis.some((a) => form.apis.includes(a))
+                        ? "Couldn’t load manufacturers — reselect the API to retry"
+                        : manufacturerOptions.length
+                          ? "Search company / factory"
+                          : "No manufacturers found for this API"
+                }
+                invalid={!!errors.manufacturer}
+                onChange={(v) => set("manufacturer", v)}
+              />
+            </Field>
+
+            <div className={`${styles.wide} ${styles.pairArea}`}>
+              {form.apis.length > 0 && form.manufacturer.length > 0 && (
+                <button
+                  type="button"
+                  className={styles.pairAddBtn}
+                  onClick={handleAddApiManufacturer}
+                >
+                  + Add pair
+                </button>
+              )}
+
+              {form.apiManufacturers.length > 0 && (
+                <table className={styles.pairTable}>
+                  <thead>
+                    <tr>
+                      <th scope="col">API</th>
+                      <th scope="col">Manufacturer</th>
+                      <th scope="col">
+                        <span className={styles.srOnly}>Remove</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {form.apiManufacturers.map((p, i) => (
+                      <tr key={`${p.api}|${p.manufacturer}`}>
+                        <td>{p.api}</td>
+                        <td>{p.manufacturer}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className={styles.pairRemove}
+                            aria-label={`Remove ${p.api} – ${p.manufacturer}`}
+                            onClick={() => removeApiManufacturer(i)}
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {errors.apiManufacturers && (
+                <p id="apiManufacturers-error" className={styles.error}>
+                  {errors.apiManufacturers}
+                </p>
+              )}
+            </div>
+          </Step>
+
+          <Step
+            n={3}
+            title="Presentation"
+            desc="Strengths, pack sizes, dosage form and route of administration."
           >
-            <Select
-              id="dosageForm"
-              value={form.dosageForm}
-              options={DOSAGE_FORMS}
-              placeholder="Select dosage form"
-              invalid={!!errors.dosageForm}
-              onChange={(v) => set("dosageForm", v)}
-            />
-          </Field>
+            <Field
+              label="Strength"
+              htmlFor="strengths-0"
+              error={errors.strengths}
+            >
+              <Repeatable
+                idPrefix="strengths"
+                values={form.strengths}
+                placeholder="e.g. 500 mg"
+                addLabel="Add strength"
+                invalid={!!errors.strengths}
+                onChange={(v) => set("strengths", v)}
+              />
+            </Field>
 
-          <Field label="Route" htmlFor="route" error={errors.route}>
-            <Select
-              id="route"
-              value={form.route}
-              options={ROUTES}
-              placeholder="Select route"
-              invalid={!!errors.route}
-              onChange={(v) => set("route", v)}
-            />
-          </Field>
+            <Field
+              label="Pack Size"
+              htmlFor="packSizes-0"
+              error={errors.packSizes}
+            >
+              <Repeatable
+                idPrefix="packSizes"
+                values={form.packSizes}
+                placeholder="e.g. 10 Tablets"
+                addLabel="Add pack size"
+                invalid={!!errors.packSizes}
+                onChange={(v) => set("packSizes", v)}
+              />
+            </Field>
 
-          {/* <Field
+            <Field
+              label="Dosage Form"
+              htmlFor="dosageForm"
+              error={errors.dosageForm}
+            >
+              <Select
+                id="dosageForm"
+                value={form.dosageForm}
+                options={DOSAGE_FORMS}
+                placeholder="Select dosage form"
+                invalid={!!errors.dosageForm}
+                onChange={(v) => set("dosageForm", v)}
+              />
+            </Field>
+
+            <Field label="Route" htmlFor="route" error={errors.route}>
+              <Select
+                id="route"
+                value={form.route}
+                options={ROUTES}
+                placeholder="Select route"
+                invalid={!!errors.route}
+                onChange={(v) => set("route", v)}
+              />
+            </Field>
+
+            {/* <Field
             label="Trademark Owner"
             htmlFor="trademarkOwner"
             error={errors.trademarkOwner}
@@ -569,34 +658,37 @@ export default function ProductForm({ country }: { country: string }) {
               onChange={(v) => set("trademarkOwner", v)}
             />
           </Field> */}
-        </div>
+          </Step>
 
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={handleReset}
-          >
-            Reset
-          </button>
-          <button
-            type="submit"
-            className={styles.primary}
-            disabled={submitting}
-          >
-            Submit
-          </button>
-        </div>
-      </form>
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.secondary}
+              onClick={handleReset}
+            >
+              Reset
+            </button>
+            <button
+              ref={submitRef}
+              type="submit"
+              className={styles.primary}
+              disabled={submitting}
+            >
+              Save &amp; continue
+            </button>
+          </div>
+        </form>
+      </div>
 
       {submitting && (
-        <LoadingScreen text="Please wait while we submit your product details" />
+        <LoadingScreen text="Please wait while we save your product details" />
       )}
 
       {popup && (
         <ResultPopup
           popup={popup}
           country={country}
+          returnFocusTo={submitRef}
           onClose={() => setPopup(null)}
           onNext={handleNext}
         />
@@ -610,80 +702,112 @@ function ResultPopup({
   country,
   onClose,
   onNext,
+  returnFocusTo,
 }: {
   popup: Popup;
   country: string;
+  returnFocusTo: React.RefObject<HTMLButtonElement | null>;
   onClose: () => void;
   onNext: () => void;
 }) {
   const isWarning = popup.type === "warning";
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div
-        role={isWarning ? "alertdialog" : "dialog"}
-        aria-modal="true"
-        aria-labelledby="popup-title"
-        className={`${styles.popup} ${isWarning ? styles.popupWarning : styles.popupSuccess}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <span className={styles.popupIcon} aria-hidden>
-          {isWarning ? "!" : "✓"}
-        </span>
-        <h2 id="popup-title" className={styles.popupTitle}>
-          {isWarning ? "Warning" : "Success"}
-        </h2>
+    <Modal
+      labelledBy="popup-title"
+      returnFocusTo={returnFocusTo}
+      alert={isWarning}
+      className={`${styles.popup} ${isWarning ? styles.popupWarning : styles.popupSuccess}`}
+      onClose={onClose}
+    >
+      <span className={styles.popupIcon} aria-hidden>
+        <Icon name={isWarning ? "alert" : "check"} />
+      </span>
+      <h2 id="popup-title" className={styles.popupTitle}>
+        {isWarning ? "Compliance review required" : "Product details saved"}
+      </h2>
 
-        {isWarning ? (
-          <ul className={styles.popupList}>
-            {popup.messages.map((m) => (
-              <li key={m}>{m}</li>
+      {isWarning ? (
+        <>
+          <p className={styles.popupText}>
+            The following items were flagged against regulatory lists. Review
+            them before continuing.
+          </p>
+          <ul className={styles.noticeList}>
+            {popup.notices.map((n) => (
+              <li key={n.title} className={styles.notice}>
+                <span className={styles.noticeTitle}>{n.title}</span>
+                <span className={styles.noticeBody}>{n.message}</span>
+                <span className={styles.noticeRef}>
+                  <Icon name="file" />
+                  Ref: {n.reference}
+                </span>
+              </li>
             ))}
           </ul>
-        ) : (
-          <p className={styles.popupText}>
-            Product details saved successfully for {country}.
-          </p>
-        )}
+        </>
+      ) : (
+        <p className={styles.popupText}>
+          Product details saved successfully for {country}.
+        </p>
+      )}
 
-        <div className={styles.popupActions}>
-          {isWarning ? (
+      <div className={styles.popupActions}>
+        {isWarning ? (
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={onClose}
+            data-autofocus
+          >
+            Review details
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              className={styles.secondary}
+              onClick={onClose}
+            >
+              Close
+            </button>
             <button
               type="button"
               className={styles.primary}
-              onClick={onClose}
-              autoFocus
+              onClick={onNext}
+              data-autofocus
             >
-              OK
+              Next →
             </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                className={styles.secondary}
-                onClick={onClose}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className={styles.primary}
-                onClick={onNext}
-                autoFocus
-              >
-                Next →
-              </button>
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
-    </div>
+    </Modal>
+  );
+}
+
+function Step({
+  n,
+  title,
+  desc,
+  children,
+}: {
+  n: number;
+  title: string;
+  desc: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <fieldset className={styles.step}>
+      <legend className={styles.stepHead}>
+        <span className={styles.stepNum}>{n}</span>
+        <span>
+          <span className={styles.stepTitle}>{title}</span>
+          <span className={styles.stepDesc}>{desc}</span>
+        </span>
+      </legend>
+      <div className={styles.grid}>{children}</div>
+    </fieldset>
   );
 }
 
@@ -706,7 +830,11 @@ function Field({
         {label} <span className={styles.required}>*</span>
       </label>
       {children}
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p id={errorId(htmlFor)} className={styles.error}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -734,7 +862,9 @@ function Select({
           value ? "" : styles.placeholder
         }`}
         value={value}
-        aria-invalid={invalid || undefined}
+        required
+        aria-invalid={invalid}
+        aria-describedby={invalid ? errorId(id) : undefined}
         onChange={(e) => onChange(e.target.value)}
       >
         <option value="" disabled>
@@ -778,6 +908,11 @@ function Repeatable({
             className={`${styles.input} ${invalid ? styles.invalid : ""}`}
             placeholder={placeholder}
             value={v}
+            required={i === 0}
+            aria-invalid={invalid}
+            aria-describedby={
+              invalid && i === 0 ? errorId(`${idPrefix}-0`) : undefined
+            }
             aria-label={
               i > 0 ? `${addLabel.replace("Add ", "")} ${i + 1}` : undefined
             }
@@ -797,13 +932,6 @@ function Repeatable({
           )}
         </div>
       ))}
-      <button
-        type="button"
-        className={styles.addBtn}
-        onClick={() => onChange([...values, ""])}
-      >
-        + {addLabel}
-      </button>
     </div>
   );
 }

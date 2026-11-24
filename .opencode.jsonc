@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "shell": "/bin/bash",
+  "policies": [
+    { "action": "tool.use", "resource": "shell:git push *", "effect": "deny" },
+  ],
+  "watcher": {
+    "ignore": [".next/**", "node_modules/**"],
+  },
+}

@@ -14,16 +14,17 @@ export default function LoadingScreen({
   return (
     <div
       className={styles.loader}
-      role="status"
-      aria-live="polite"
+      // Indeterminate progressbar (no aria-valuenow) rather than a live
+      // region: loading interstitials announced via aria-live are just noise
+      role="progressbar"
       aria-label={text}
     >
       <div className={styles.loaderRing}>
         <svg viewBox="0 0 100 100" className={styles.loaderArcs} aria-hidden>
           <defs>
             <linearGradient id="loaderGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#0284c7" />
-              <stop offset="100%" stopColor="#0f4c8a" />
+              <stop offset="0%" stopColor="#2563d4" />
+              <stop offset="100%" stopColor="#193f94" />
             </linearGradient>
           </defs>
           {/* 4 arc segments: one strong, three faded */}

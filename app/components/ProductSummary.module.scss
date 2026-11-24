@@ -3,16 +3,20 @@
 .card {
   max-width: 64rem;
   margin: 0 auto;
-  padding: 1rem;
+  border: 1px solid $border;
+  border-radius: $radius;
+  background: $white;
+  box-shadow: $shadow-sm;
+}
+
+.cardBody {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  border-radius: 1.5rem;
-  background: $white;
-  box-shadow: 0 10px 30px rgba($navy, 0.06);
+  gap: 0.75rem;
+  padding: 1rem;
 
   @include md {
-    padding: 1.75rem;
+    padding: 1.5rem;
   }
 }
 
@@ -25,7 +29,7 @@
 // ---------- Accordion section ----------
 .section {
   border: 1px solid $slate-200;
-  border-radius: 1rem;
+  border-radius: $radius;
   overflow: hidden;
   background: $white;
 }
@@ -49,23 +53,24 @@
 }
 
 .sectionOpen .sectionHeader {
-  background: linear-gradient(90deg, rgba($primary, 0.14), rgba($primary, 0.05));
+  background: $slate-50;
+  box-shadow: inset 3px 0 0 $primary;
 }
 
 .sectionIcon {
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 0.75rem;
-  background: rgba($primary, 0.14);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: $radius-sm;
+  background: $brand-50;
   color: $primary;
   transition: background-color 0.15s ease, color 0.15s ease;
 
   svg {
-    width: 1.375rem;
-    height: 1.375rem;
+    width: 1.125rem;
+    height: 1.125rem;
   }
 }
 
@@ -76,7 +81,7 @@
 
 .sectionTitle {
   flex: 1;
-  font-size: 1.0625rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: $navy;
 }
@@ -121,21 +126,17 @@
 
 .docList {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid $slate-200;
 }
 
 .doc {
-  border: 1px solid $slate-200;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  transition: border-color 0.15s ease;
+  & + & {
+    border-top: 1px solid $slate-100;
+  }
 }
 
 .docOpen {
-  border-color: rgba($primary, 0.4);
+  background: $slate-50;
 }
 
 .docHeader {
@@ -143,7 +144,7 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  padding: 0.875rem 1rem;
+  padding: 0.75rem 1rem;
   text-align: left;
 }
 
@@ -160,20 +161,21 @@ button.docHeader {
 }
 
 .docOpen .docHeader {
-  background: rgba($primary, 0.07);
+  background: transparent;
 }
 
 .docNum {
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 50%;
-  background: rgba($primary, 0.12);
-  font-size: 0.8125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.375rem;
+  background: $slate-100;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: $primary;
+  color: $slate-700;
 }
 
 .docOpen .docNum {
@@ -183,7 +185,8 @@ button.docHeader {
 
 .docTitle {
   flex: 1;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: $navy;
 }
 
@@ -217,10 +220,9 @@ button.docHeader {
 }
 
 .docPoints {
-  padding: 0.75rem 1.25rem 1rem 3.75rem;
-  font-size: 0.9375rem;
+  padding: 0 1.25rem 0.875rem 3.375rem;
+  font-size: 0.8125rem;
   color: $slate-700;
-  border-top: 1px solid $slate-200;
 
   li {
     margin-top: 0.25rem;
@@ -236,7 +238,7 @@ button.docHeader {
 .declaration {
   padding: 1rem 1.25rem 1.25rem;
   border-top: 1px solid $slate-200;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: $slate-700;
 
   p + p {
@@ -265,10 +267,10 @@ button.docHeader {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  min-height: 2.875rem;
-  padding: 0 1rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
   border: 1px solid $slate-300;
-  border-radius: 0.75rem;
+  border-radius: $radius-sm;
   background: $white;
   color: $slate-400;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -282,7 +284,7 @@ button.docHeader {
   input {
     flex: 1;
     min-width: 0;
-    padding: 0.75rem 0;
+    padding: 0.5rem 0;
     border: none;
     outline: none;
     background: transparent;
@@ -316,9 +318,11 @@ button.docHeader {
   align-items: flex-start;
   gap: 0.625rem;
   margin-top: 1rem;
-  padding: 0.875rem 1rem;
-  border-radius: 0.75rem;
-  background: rgba($primary, 0.06);
+  padding: 0.75rem 0.875rem;
+  border: 1px solid $brand-100;
+  border-radius: $radius-sm;
+  background: $brand-50;
+  font-size: 0.875rem;
   font-weight: 600;
   color: $navy;
   cursor: pointer;
@@ -335,18 +339,24 @@ button.docHeader {
 
 // ---------- Bottom actions ----------
 .actions {
-  max-width: 64rem;
-  margin: 1.5rem auto 0;
+  padding: 1rem;
+  border-top: 1px solid $border;
+  border-radius: 0 0 $radius $radius;
+  background: $slate-50;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
+
+  @include md {
+    padding: 1rem 1.5rem;
+  }
 }
 
 .hint {
   margin-right: auto;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: $slate-500;
 }
 
@@ -354,10 +364,10 @@ button.docHeader {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
-  border-radius: 1rem;
-  font-size: 1rem;
-  font-weight: 700;
+  padding: 0.625rem 1.25rem;
+  border-radius: $radius-sm;
+  font-size: 0.875rem;
+  font-weight: 600;
   text-decoration: none;
   transition: opacity 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
 
@@ -372,9 +382,9 @@ button.docHeader {
 }
 
 .btnSecondary {
+  border: 1px solid $slate-300;
   background: $white;
-  color: $navy;
-  box-shadow: 0 6px 18px rgba($navy, 0.08);
+  color: $slate-700;
 
   &:hover {
     background: $slate-50;
@@ -384,15 +394,73 @@ button.docHeader {
 .btnPrimary {
   background: $primary;
   color: $white;
-  box-shadow: 0 8px 20px rgba($primary, 0.3);
+  border: 1px solid $primary;
 
   &:hover:not(:disabled) {
-    opacity: 0.92;
+    background: $primary-hover;
   }
 
   &:disabled {
+    border-color: $slate-300;
     background: $slate-300;
-    box-shadow: none;
     cursor: not-allowed;
+  }
+}
+
+// ---------- Readiness tracker ----------
+.tracker {
+  max-width: 64rem;
+  margin: 0 auto 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  list-style: none;
+
+  @include md {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    background: $white;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $slate-500;
+  }
+}
+
+.trackDot {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border: 1.5px solid $slate-300;
+  border-radius: 50%;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: $slate-500;
+
+  svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    stroke-width: 3;
+  }
+}
+
+.tracker li.trackDone {
+  border-color: rgba($success, 0.3);
+  background: $success-soft;
+  color: $success;
+
+  .trackDot {
+    border-color: $success;
+    background: $success;
+    color: $white;
   }
 }

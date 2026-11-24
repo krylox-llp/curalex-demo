@@ -9,31 +9,32 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.375rem;
-  min-height: 2.875rem;
-  padding: 0.375rem 2.5rem 0.375rem 0.625rem;
+  min-height: 2.5rem;
+  padding: 0.25rem 2.25rem 0.25rem 0.5rem;
   border: 1px solid $slate-300;
-  border-radius: 0.75rem;
+  border-radius: $radius-sm;
   background: $white;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:focus-within {
     border-color: $primary;
-    @include focus-ring(rgba($primary, 0.25));
+    @include focus-ring(rgba($primary, 0.18));
   }
 }
 
 .invalid {
   border-color: $danger;
+  background: rgba($danger-soft, 0.5);
 }
 
 .input {
   flex: 1;
   min-width: 6rem;
-  padding: 0.375rem 0.25rem;
+  padding: 0.25rem;
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: $slate-800;
 
   &::placeholder {
@@ -46,9 +47,10 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.375rem 0.25rem 0.625rem;
-  border-radius: 9999px;
-  background: rgba($primary, 0.12);
-  font-size: 0.8125rem;
+  border: 1px solid $brand-100;
+  border-radius: 0.375rem;
+  background: $brand-50;
+  font-size: 0.75rem;
   font-weight: 600;
   color: $sky-700;
 }
@@ -74,8 +76,9 @@
 .chevron {
   position: absolute;
   top: 50%;
-  right: 1rem;
+  right: 0.875rem;
   transform: translateY(-50%);
+  font-size: 0.75rem;
   color: $slate-500;
   pointer-events: none;
   transition: transform 0.15s ease;
@@ -96,21 +99,21 @@
   padding: 0.375rem;
   list-style: none;
   border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border-radius: $radius-sm;
   background: $white;
-  box-shadow: 0 10px 25px rgba($navy, 0.1);
+  box-shadow: $shadow-lg;
 }
 
 .option {
-  padding: 0.625rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.9375rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   color: $slate-700;
   cursor: pointer;
 }
 
 .optionActive {
-  background: $page-bg;
+  background: $brand-50;
 }
 
 .optionSelected {

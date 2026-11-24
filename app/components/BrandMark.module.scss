@@ -1,0 +1,46 @@
+@use "../styles/variables" as *;
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: $navy;
+}
+
+.mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+}
+
+.shield {
+  fill: $brand-600;
+}
+
+.cross {
+  fill: $white;
+}
+
+.name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+
+  span {
+    color: $brand-600;
+  }
+}
+
+.light {
+  color: $white;
+
+  .shield {
+    fill: rgba($white, 0.16);
+    stroke: rgba($white, 0.55);
+    stroke-width: 1.2;
+  }
+
+  .name span {
+    color: $brand-200;
+  }
+}

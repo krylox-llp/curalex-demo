@@ -14,6 +14,9 @@ type Props = {
   allowCustom?: boolean;
   placeholder?: string;
   invalid?: boolean;
+  required?: boolean;
+  /** id of the error message, linked while invalid */
+  describedBy?: string;
 };
 
 export default function SearchSelect({
@@ -25,6 +28,8 @@ export default function SearchSelect({
   allowCustom = false,
   placeholder = "Search…",
   invalid = false,
+  required = false,
+  describedBy,
 }: Props) {
   const listId = useId();
   const [query, setQuery] = useState(multiple ? "" : (value[0] ?? ""));
@@ -122,7 +127,9 @@ export default function SearchSelect({
           role="combobox"
           aria-expanded={open}
           aria-controls={listId}
-          aria-invalid={invalid || undefined}
+          aria-invalid={invalid}
+          aria-required={required || undefined}
+          aria-describedby={describedBy}
           autoComplete="off"
           className={styles.input}
           placeholder={multiple && value.length ? "" : placeholder}

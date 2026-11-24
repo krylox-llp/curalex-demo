@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Flag from "./Flag";
 import styles from "./CountrySelect.module.scss";
 
 export const COUNTRIES = ["NIGERIA"];
@@ -65,15 +66,22 @@ export default function CountrySelect({ value, onChange }: Props) {
 
   return (
     <div className={styles.combo} ref={boxRef}>
+      <span className={styles.leading}>
+        {value ? (
+          <Flag country={value} />
+        ) : (
+          <span className={styles.flagEmpty} />
+        )}
+      </span>
       <input
         id="country"
         type="text"
         role="combobox"
-        aria-label="Country"
+        aria-label="Target market"
         aria-expanded={open}
         aria-controls="country-list"
         autoComplete="off"
-        placeholder="Select country"
+        placeholder="Select target market"
         className={styles.input}
         value={query}
         onFocus={() => setOpen(true)}
@@ -111,6 +119,7 @@ export default function CountrySelect({ value, onChange }: Props) {
                   choose(c);
                 }}
               >
+                <Flag country={c} size="sm" />
                 {c}
               </li>
             ))

@@ -1,28 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import GoogleButton from "./GoogleButton";
+import { Icon } from "./Icon";
 import styles from "./LoginForm.module.scss";
 
 export default function LoginForm() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  console.log("Email:", email);
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    router.push(`/register?email=${encodeURIComponent(email.trim())}`);
-  }
-
   return (
     <>
-      <h1 className={styles.title}>Welcome !</h1>
+      <span className={styles.eyebrow}>Secure access</span>
+      <h1 className={styles.title}>Sign in to your workspace</h1>
       <p className={styles.subtitle}>
-        Sign in securely with your Google account
+        Manage product registrations, compliance checks and registration
+        documents for your export markets.
       </p>
 
       <GoogleButton />
+
+      <p className={styles.note}>
+        <Icon name="shield" />
+        Authentication is handled by Google. We never see or store your
+        password.
+      </p>
     </>
   );
 }

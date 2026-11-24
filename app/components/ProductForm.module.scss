@@ -1,13 +1,19 @@
 @use "../styles/variables" as *;
 
-.page {
+// Shared by ProductForm, ProductSummary and DocumentUpload.
+
+.shell {
   min-height: 100vh;
   width: 100%;
-  padding: 1.5rem 1rem 3rem;
   background: $page-bg;
+}
+
+.page {
+  width: 100%;
+  padding: 1.5rem 1rem 3rem;
 
   @include md {
-    padding: 2.5rem 3rem 4rem;
+    padding: 2rem 2rem 4rem;
   }
 }
 
@@ -16,65 +22,163 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1rem 2rem;
   max-width: 64rem;
   margin: 0 auto 1.5rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $brand-600;
 }
 
 .back {
   display: inline-block;
   margin-bottom: 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: $primary;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $slate-500;
   text-decoration: none;
 
   &:hover {
-    text-decoration: underline;
+    color: $primary;
   }
 }
 
 .title {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
+  margin-top: 0.25rem;
+  font-size: 1.625rem;
   font-weight: 700;
   color: $navy;
 }
 
 .subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.9375rem;
+  margin-top: 0.375rem;
+  max-width: 38rem;
+  font-size: 0.875rem;
   color: $slate-500;
 }
 
 .countryBadge {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  background: rgba($primary, 0.12);
-  font-size: 0.875rem;
-  color: $sky-700;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  background: $white;
+  font-size: 0.8125rem;
+  color: $slate-700;
 }
 
-.card {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 1.5rem;
-  border-radius: 1.25rem;
-  background: $white;
-  box-shadow: 0 10px 30px rgba($navy, 0.06);
+// ---------- Stepper (section overview) ----------
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  list-style: none;
+  counter-reset: step;
 
-  @include md {
-    padding: 2.25rem;
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+    border: 1px solid $border;
+    border-radius: 999px;
+    background: $white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $slate-700;
+    counter-increment: step;
+
+    &::before {
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      background: $brand-50;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: $brand-700;
+    }
   }
 }
 
-.grid {
+// ---------- Card & steps ----------
+.card {
+  max-width: 64rem;
+  margin: 0 auto;
+  border: 1px solid $border;
+  border-radius: $radius;
+  background: $white;
+  box-shadow: $shadow-sm;
+}
+
+.step {
+  min-width: 0;
+  padding: 1.25rem;
+  border: none;
+
+  & + & {
+    border-top: 1px solid $border;
+  }
+
+  @include md {
+    padding: 1.75rem 2rem;
+  }
+}
+
+.stepHead {
+  float: left; // lets <legend> lay out like a normal block
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+
+  > span:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+}
+
+.stepNum {
   display: grid;
-  gap: 1.5rem;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: $radius-sm;
+  background: $brand-600;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: $white;
+}
+
+.stepTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $navy;
+}
+
+.stepDesc {
+  font-size: 0.8125rem;
+  color: $slate-500;
+}
+
+.grid {
+  clear: both;
+  display: grid;
+  gap: 1.125rem;
 
   @include md {
     grid-template-columns: repeat(2, 1fr);
-    column-gap: 2rem;
+    column-gap: 1.5rem;
+    padding-left: 2.625rem; // align with step title
   }
 }
 
@@ -91,8 +195,8 @@
 }
 
 .label {
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: $slate-700;
 }
@@ -103,12 +207,12 @@
 
 .input {
   width: 100%;
-  min-height: 2.875rem;
-  padding: 0.75rem 1rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid $slate-300;
-  border-radius: 0.75rem;
+  border-radius: $radius-sm;
   background: $white;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: $slate-800;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
@@ -116,14 +220,19 @@
     color: $slate-400;
   }
 
+  &:hover:not(:focus) {
+    border-color: $slate-400;
+  }
+
   &:focus {
     border-color: $primary;
-    @include focus-ring(rgba($primary, 0.25));
+    @include focus-ring(rgba($primary, 0.18));
   }
 }
 
 .invalid {
   border-color: $danger;
+  background: rgba($danger-soft, 0.5);
 }
 
 .selectWrap {
@@ -132,9 +241,7 @@
 
 .select {
   appearance: none;
-  padding-right: 2.5rem;
-  font: inherit;
-  font-size: 0.9375rem;
+  padding-right: 2.25rem;
   cursor: pointer;
 }
 
@@ -145,15 +252,17 @@
 .chevron {
   position: absolute;
   top: 50%;
-  right: 1rem;
+  right: 0.875rem;
   transform: translateY(-50%);
+  font-size: 0.75rem;
   color: $slate-500;
   pointer-events: none;
 }
 
 .error {
   margin-top: 0.375rem;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: $danger;
 }
 
@@ -171,11 +280,11 @@
 
 .removeBtn {
   flex-shrink: 0;
-  width: 2.875rem;
+  width: 2.5rem;
   border: 1px solid $slate-300;
-  border-radius: 0.75rem;
+  border-radius: $radius-sm;
   background: $white;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   color: $slate-500;
   cursor: pointer;
 
@@ -187,10 +296,10 @@
 
 .addBtn {
   align-self: flex-start;
-  padding: 0.25rem 0;
+  padding: 0.125rem 0;
   border: none;
   background: none;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: $primary;
   cursor: pointer;
@@ -204,37 +313,54 @@
 .success {
   margin-top: 1.5rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  background: #ddf5e8;
-  font-size: 0.9375rem;
+  border-radius: $radius-sm;
+  background: $success-soft;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #13704a;
+  color: $success;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid $border;
+  border-radius: 0 0 $radius $radius;
+  background: $slate-50;
+
+  @include md {
+    padding: 1rem 2rem;
+  }
 }
 
 .primary,
 .secondary {
-  padding: 0.75rem 1.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.9375rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: $radius-sm;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:focus-visible {
+    @include focus-ring(rgba($primary, 0.3));
+  }
 }
 
 .primary {
-  border: none;
+  border: 1px solid $primary;
   background: $primary;
   color: $white;
 
-  &:hover {
-    opacity: 0.9;
+  &:hover:not(:disabled) {
+    border-color: $primary-hover;
+    background: $primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
   }
 }
 
@@ -244,94 +370,135 @@
   color: $slate-700;
 
   &:hover {
-    background: $slate-50;
+    background: $slate-100;
   }
 }
 
-// ---------- Result popup ----------
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgba($navy, 0.45);
-  backdrop-filter: blur(2px);
-}
-
+// ---------- Result popup / compliance dialog ----------
 .popup {
   width: 100%;
-  max-width: 28rem;
-  padding: 2rem 1.75rem 1.5rem;
-  border-radius: 1.25rem;
+  max-width: 30rem;
+  padding: 1.5rem;
+  border-radius: $radius;
   background: $white;
-  box-shadow: 0 25px 50px rgba($navy, 0.25);
-  text-align: center;
-  animation: popIn 0.18s ease-out;
+  box-shadow: $shadow-lg;
+  animation: popIn 0.16s ease-out;
 }
 
 @keyframes popIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(4px) scale(0.98);
   }
 }
 
 .popupIcon {
   display: inline-grid;
   place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  font-size: 1.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: $radius-sm;
+  font-size: 1.25rem;
   font-weight: 800;
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }
 
 .popupWarning .popupIcon {
-  background: #fff1d6;
-  color: #b45309;
+  background: $warning-soft;
+  color: $warning;
 }
 
 .popupSuccess .popupIcon {
-  background: #ddf5e8;
-  color: #13704a;
+  background: $success-soft;
+  color: $success;
 }
 
 .popupTitle {
-  margin-top: 0.75rem;
-  font-size: 1.375rem;
+  margin-top: 0.875rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: $navy;
 }
 
 .popupText {
-  margin-top: 0.5rem;
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
   color: $slate-700;
 }
 
+// Legacy plain list (kept for any generic warnings)
 .popupList {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+
+  li {
+    padding: 0.625rem 0.875rem;
+    border-left: 3px solid $warning;
+    border-radius: $radius-sm;
+    background: $warning-soft;
+    font-size: 0.875rem;
+    color: #6b4000;
+  }
+}
+
+.noticeList {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
   list-style: none;
-  text-align: left;
+}
 
-  li {
-    padding: 0.75rem 1rem;
-    border-left: 4px solid #f59e0b;
-    border-radius: 0.5rem;
-    background: #fffbeb;
-    font-size: 0.9375rem;
-    color: #78350f;
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid rgba($warning, 0.25);
+  border-left: 3px solid $warning;
+  border-radius: $radius-sm;
+  background: $warning-soft;
+}
+
+.noticeTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #6b4000;
+}
+
+.noticeBody {
+  font-size: 0.8125rem;
+  color: $slate-700;
+}
+
+.noticeRef {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: $warning;
+
+  svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
   }
 }
 
 .popupActions {
   display: flex;
-  justify-content: center;
-  gap: 0.75rem;
+  justify-content: flex-end;
+  gap: 0.625rem;
   margin-top: 1.5rem;
 }
 
@@ -346,12 +513,12 @@
 }
 
 .summaryItem {
-  padding: 0.875rem 1rem;
-  border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
 
   dt {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: $slate-500;
   }
@@ -375,7 +542,6 @@ a.secondary {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-top: -0.75rem; // sit closer to the two pickers above
 
   &:empty {
     display: none;
@@ -384,22 +550,22 @@ a.secondary {
 
 .pairAddBtn {
   align-self: flex-end;
-  padding: 0.5rem 1.5rem;
-  border: none;
-  border-radius: 0.75rem;
-  background: $primary;
-  font-size: 0.9375rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid $primary;
+  border-radius: $radius-sm;
+  background: $brand-50;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: $white;
+  color: $primary;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: background-color 0.15s ease;
 
   &:hover {
-    opacity: 0.9;
+    background: $brand-100;
   }
 
   &:focus-visible {
-    @include focus-ring(rgba($primary, 0.35));
+    @include focus-ring(rgba($primary, 0.3));
   }
 }
 
@@ -407,29 +573,31 @@ a.secondary {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border: 1px solid $slate-200;
-  border-radius: 0.75rem;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
   overflow: hidden;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
 
   th,
   td {
-    padding: 0.625rem 1rem;
+    padding: 0.5rem 0.875rem;
     text-align: left;
     vertical-align: middle;
     overflow-wrap: anywhere;
   }
 
   th {
-    background: rgba($primary, 0.08);
-    font-size: 0.8125rem;
+    background: $slate-50;
+    font-size: 0.6875rem;
     font-weight: 700;
-    color: $navy;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $slate-500;
   }
 
   td {
-    border-top: 1px solid $slate-200;
-    font-weight: 600;
+    border-top: 1px solid $border;
+    font-weight: 500;
     color: $slate-800;
   }
 
@@ -456,12 +624,12 @@ a.secondary {
 
 .pairRemove {
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border: 1px solid $slate-300;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   background: $white;
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: $slate-500;
   cursor: pointer;
 

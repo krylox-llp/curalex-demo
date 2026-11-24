@@ -1,6 +1,5 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import styles from "./GoogleButton.module.scss";
 
 export default function GoogleButton({
@@ -9,9 +8,19 @@ export default function GoogleButton({
   label?: string;
 }) {
   const handleGoogleLogin = async () => {
-    await signIn("google", {
-      redirectTo: "/register",
-    });
+    // POST /api/sign-in-google starts the Supabase hosted OAuth flow and
+    // returns the authorize URL; the browser then goes to Google.
+    try {
+      const response = await fetch("/api/sign-in-google", { method: "POST" });
+      const data = (await response.json()) as { url: string | null };
+      if (response.ok && data.url) {
+        window.location.assign(data.url);
+      } else {
+        console.error("Google sign-in failed:", data);
+      }
+    } catch (err) {
+      console.error("Google sign-in request failed:", err);
+    }
   };
 
   return (
