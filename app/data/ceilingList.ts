@@ -25,9 +25,10 @@ export type CeilingEntry = {
   dosageForms: string;
   scope: CeilingScope;
   /**
-   * exact: the product's APIs are exactly these (single API or a listed combination)
+   * exact: the product's APIs are exactly this listed combination
    * fdc: any combination (2+ APIs) that contains this API
-   * contains: any product that contains this API
+   * contains: any product that contains this API (single-API entries, so
+   *   Albendazole + another API is still flagged)
    */
   match:
     | { kind: "exact"; apis: string[] }
@@ -49,7 +50,7 @@ const single = (
   label,
   dosageForms,
   scope,
-  match: { kind: "exact", apis: [api] },
+  match: { kind: "contains", api },
 });
 
 const combo = (
@@ -220,7 +221,7 @@ export function ceilingMatches(apis: string[], route: string): CeilingEntry[] {
   const names = [...new Set(apis.map(normalize))];
   const has = (key: string) => names.some((n) => isApi(n, key));
 
-  return CEILING_LIST.filter((entry) => {
+  const matched = CEILING_LIST.filter((entry) => {
     if (!inScope(entry.scope, route)) return false;
     const m = entry.match;
     switch (m.kind) {
@@ -236,4 +237,16 @@ export function ceilingMatches(apis: string[], route: string): CeilingEntry[] {
         return has(m.api);
     }
   });
+
+  // Drop a single-API flag already covered by a more specific matched entry
+  // (Amoxicillin + Clavulanic acid → item 24 only, not also item 25)
+  const covered = (api: string) =>
+    matched.some(
+      (e) =>
+        (e.match.kind === "exact" && e.match.apis.includes(api)) ||
+        (e.match.kind === "fdc" && e.match.api === api),
+    );
+  return matched.filter(
+    (e) => e.match.kind !== "contains" || !covered(e.match.api),
+  );
 }
