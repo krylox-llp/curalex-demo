@@ -1,0 +1,26 @@
+app/data/ceilingList.ts
+  s_82a28f1409c733::t_5e9dd8277a5c88 28,30-31,53,224,240-251
+tsconfig.tsbuildinfo
+  s_82a28f1409c733::t_5e9dd8277a5c88 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "73d4af08e4192ac12151d01910cff597cc405c49",
+  "prompts": {},
+  "humans": {
+    "h_aaadf2e6c798e3": {
+      "author": "Jagadeesh J <jagadeesh@krylox.ai>"
+    }
+  },
+  "sessions": {
+    "s_82a28f1409c733": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "28f4927e-e645-4aec-a69e-701317879bd3",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jagadeesh J <jagadeesh@krylox.ai>"
+    }
+  }
+}
